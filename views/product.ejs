@@ -40,15 +40,18 @@
     <form class="buy-box" method="post" action="/cart/add/<%= product._id %>">
       <input type="hidden" id="selectedImage" name="image" value="<%= imgs[0] %>">
 
+      <input type="hidden" id="selectedSize" name="size" value="">
+      <input type="hidden" id="selectedColor" name="color" value="">
+
       <label>المقاس
-        <select id="selectedSize" name="size" <%= sizeOptions.length ? 'required' : '' %>>
+        <select id="sizeSelect" name="_size" <%= sizeOptions.length ? 'required' : '' %> onchange="document.getElementById('selectedSize').value=this.value">
           <option value=""><%= sizeOptions.length ? 'اختار المقاس' : 'لا يوجد مقاسات محددة' %></option>
           <% sizeOptions.forEach(s=>{ %><option value="<%= s %>"><%= s %></option><% }) %>
         </select>
       </label>
 
       <label>اللون
-        <select id="selectedColor" name="color" <%= colorOptions.length ? 'required' : '' %>>
+        <select id="colorSelect" name="_color" <%= colorOptions.length ? 'required' : '' %> onchange="document.getElementById('selectedColor').value=this.value">
           <option value=""><%= colorOptions.length ? 'اختار اللون' : 'لا يوجد ألوان محددة' %></option>
           <% colorOptions.forEach(c=>{ %><option value="<%= c %>"><%= c %></option><% }) %>
         </select>

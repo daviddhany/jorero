@@ -76,7 +76,7 @@ function moveProductPhoto(direction){
   setProductPhoto(productPhotoIndex + direction);
 }
 function setSelectedColorValue(color){
-  const select = document.getElementById('selectedColor');
+  const select = document.getElementById('colorSelect') || document.getElementById('selectedColor');
   if (!select || !color) return;
 
   // If the admin added a color image without checking the same color in the
@@ -88,6 +88,8 @@ function setSelectedColorValue(color){
     select.add(option);
   }
   select.value = option.value;
+  const hidden = document.getElementById('selectedColor');
+  if (hidden) hidden.value = option.value;
 }
 function showColorPhoto(image, color){
   const main = document.getElementById('mainImg');
@@ -112,6 +114,21 @@ function showColorPhoto(image, color){
   });
 })();
 
+// Keep visible selects synced with the real submitted hidden fields.
+(function(){
+  const sizeSelect = document.getElementById('sizeSelect');
+  const colorSelect = document.getElementById('colorSelect');
+  const hiddenSize = document.getElementById('selectedSize');
+  const hiddenColor = document.getElementById('selectedColor');
+  if (sizeSelect && hiddenSize) {
+    hiddenSize.value = sizeSelect.value || '';
+    sizeSelect.addEventListener('change', function(){ hiddenSize.value = sizeSelect.value || ''; });
+  }
+  if (colorSelect && hiddenColor) {
+    hiddenColor.value = colorSelect.value || '';
+    colorSelect.addEventListener('change', function(){ hiddenColor.value = colorSelect.value || ''; });
+  }
+})();
 
 // Add to cart without leaving product page
 (function(){
@@ -134,9 +151,15 @@ function showColorPhoto(image, color){
   form.addEventListener('submit', async function(e){
     e.preventDefault();
 
-    const colorSelect = form.querySelector('[name="color"]');
+    const sizeSelect = document.getElementById('sizeSelect');
+    const colorSelect = document.getElementById('colorSelect');
+    const hiddenSize = document.getElementById('selectedSize');
+    const hiddenColor = document.getElementById('selectedColor');
     const activeColorBtn = document.querySelector('.color-photo-btn.active');
-    if (colorSelect && !colorSelect.value && activeColorBtn && activeColorBtn.dataset.color) {
+
+    if (hiddenSize && sizeSelect) hiddenSize.value = sizeSelect.value || '';
+    if (hiddenColor && colorSelect) hiddenColor.value = colorSelect.value || '';
+    if (hiddenColor && !hiddenColor.value && activeColorBtn && activeColorBtn.dataset.color) {
       setSelectedColorValue(activeColorBtn.dataset.color);
     }
 
