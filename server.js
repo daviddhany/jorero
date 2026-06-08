@@ -52,19 +52,6 @@ async function start() {
     await mongoose.connect(uri);
 console.log('MongoDB connected');
 
-await Admin.findOneAndUpdate(
-  { username: process.env.ADMIN_USERNAME || 'admin' },
-  {
-    username: process.env.ADMIN_USERNAME || 'admin',
-    password: await bcrypt.hash(process.env.ADMIN_PASSWORD || '12345', 10),
-    role: 'super_admin',
-    active: true
-  },
-  { upsert: true }
-);
-
-console.log('Admin ensured');
-
 await dropOldSlugIndex();
     const port = process.env.PORT || 3000;
     app.listen(port, () => console.log('http://localhost:' + port));
