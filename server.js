@@ -7,6 +7,8 @@ const path = require('path');
 const helmet = require('helmet');
 const methodOverride = require('method-override');
 const Product = require('./models/Product');
+const Admin = require('./models/Admin');
+const bcrypt = require('bcryptjs');
 
 const app = express();
 const uri = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/jorero_shop';
@@ -45,8 +47,22 @@ app.use((req, res) => res.status(404).render('404', { title: 'الصفحة غي�
 async function start() {
   try {
     await mongoose.connect(uri);
-    console.log('MongoDB connected');
-    await dropOldSlugIndex();
+console.log('MongoDB connected');
+
+await Admin.findOneAndUpdate(
+  { username: process.env.ADMIN_USERNAME || 'admin' },
+  {
+    username: process.env.ADMIN_USERNAME || 'admin',
+    password: await bcrypt.hash(process.env.ADMIN_PASSWORD || '12345', 10),
+    role: 'super_admin',
+    active: true
+  },
+  { upsert: true }
+);
+
+console.log('Admin ensured');
+
+await dropOldSlugIndex();
     const port = process.env.PORT || 3000;
     app.listen(port, () => console.log('http://localhost:' + port));
   } catch (err) {
