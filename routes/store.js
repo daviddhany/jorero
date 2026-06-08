@@ -54,11 +54,12 @@ router.post('/cart/add/:id', async (req, res) => {
   // Some colors are chosen by clicking the color image, so we also fallback
   // to the color name linked with that image if the select value is empty.
   const selectedColorImage = (product.colorImages || []).find(item => item.image === selectedImage);
-  const productSizes = (product.sizes || []).filter(Boolean);
-  const productColors = [...new Set([...(product.colors || []), ...((product.colorImages || []).map(item => item.color))].filter(Boolean))];
-  const firstValue = (value) => Array.isArray(value) ? value.find(v => String(v || '').trim()) : value;
-  const selectedSize = String(firstValue(req.body.size) || firstValue(req.body._size) || '').trim();
-  const selectedColor = String(firstValue(req.body.color) || firstValue(req.body._color) || selectedColorImage?.color || '').trim();
+  const clean = (v) => String(v || '').trim();
+  const firstValue = (value) => Array.isArray(value) ? value.find(v => clean(v)) : value;
+  const productSizes = (product.sizes || []).map(clean).filter(Boolean);
+  const productColors = [...new Set([...(product.colors || []), ...((product.colorImages || []).map(item => item.color))].map(clean).filter(Boolean))];
+  const selectedSize = clean(firstValue(req.body.size) || firstValue(req.body._size));
+  const selectedColor = clean(firstValue(req.body.color) || firstValue(req.body._color) || selectedColorImage?.color);
 
   if ((productSizes.length && !selectedSize) || (productColors.length && !selectedColor)) {
     const message = 'اختار المقاس واللون قبل إضافة المنتج للسلة';

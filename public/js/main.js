@@ -78,18 +78,14 @@ function moveProductPhoto(direction){
 function setSelectedColorValue(color){
   const select = document.getElementById('colorSelect') || document.getElementById('selectedColor');
   if (!select || !color) return;
-
-  // If the admin added a color image without checking the same color in the
-  // normal color list, the select will not contain that value. Add it so the
-  // browser really submits the chosen color instead of submitting an empty value.
-  let option = Array.from(select.options).find(opt => opt.value === color || opt.textContent === color);
+  const cleanColor = String(color).trim();
+  let option = Array.from(select.options).find(opt => String(opt.value).trim() === cleanColor || String(opt.textContent).trim() === cleanColor);
   if (!option) {
-    option = new Option(color, color);
+    option = new Option(cleanColor, cleanColor);
     select.add(option);
   }
   select.value = option.value;
-  const hidden = document.getElementById('selectedColor');
-  if (hidden) hidden.value = option.value;
+  select.dispatchEvent(new Event('change', { bubbles: true }));
 }
 function showColorPhoto(image, color){
   const main = document.getElementById('mainImg');
@@ -99,35 +95,18 @@ function showColorPhoto(image, color){
   if (color) setSelectedColorValue(color);
   updateThumbActive(image);
   document.querySelectorAll('.color-photo-options button').forEach(btn => {
-    const img = btn.querySelector('img');
-    const isActive = (btn.dataset.image === image) || (img && img.getAttribute('src') === image);
+    const isActive = (btn.dataset.image === image) || (String(btn.dataset.color || '').trim() === String(color || '').trim());
     btn.classList.toggle('active', isActive);
   });
 }
 
-// Color image buttons: keeps the customer's clicked color inside the form.
+// Color image buttons: keeps the customer's clicked color inside the real color select.
 (function(){
   document.querySelectorAll('.color-photo-btn').forEach(function(btn){
     btn.addEventListener('click', function(){
       showColorPhoto(btn.dataset.image || '', btn.dataset.color || '');
     });
   });
-})();
-
-// Keep visible selects synced with the real submitted hidden fields.
-(function(){
-  const sizeSelect = document.getElementById('sizeSelect');
-  const colorSelect = document.getElementById('colorSelect');
-  const hiddenSize = document.getElementById('selectedSize');
-  const hiddenColor = document.getElementById('selectedColor');
-  if (sizeSelect && hiddenSize) {
-    hiddenSize.value = sizeSelect.value || '';
-    sizeSelect.addEventListener('change', function(){ hiddenSize.value = sizeSelect.value || ''; });
-  }
-  if (colorSelect && hiddenColor) {
-    hiddenColor.value = colorSelect.value || '';
-    colorSelect.addEventListener('change', function(){ hiddenColor.value = colorSelect.value || ''; });
-  }
 })();
 
 // Add to cart without leaving product page
@@ -151,15 +130,9 @@ function showColorPhoto(image, color){
   form.addEventListener('submit', async function(e){
     e.preventDefault();
 
-    const sizeSelect = document.getElementById('sizeSelect');
-    const colorSelect = document.getElementById('colorSelect');
-    const hiddenSize = document.getElementById('selectedSize');
-    const hiddenColor = document.getElementById('selectedColor');
     const activeColorBtn = document.querySelector('.color-photo-btn.active');
-
-    if (hiddenSize && sizeSelect) hiddenSize.value = sizeSelect.value || '';
-    if (hiddenColor && colorSelect) hiddenColor.value = colorSelect.value || '';
-    if (hiddenColor && !hiddenColor.value && activeColorBtn && activeColorBtn.dataset.color) {
+    const colorSelect = document.getElementById('colorSelect') || document.getElementById('selectedColor');
+    if (colorSelect && !colorSelect.value && activeColorBtn && activeColorBtn.dataset.color) {
       setSelectedColorValue(activeColorBtn.dataset.color);
     }
 
@@ -178,6 +151,10 @@ function showColorPhoto(image, color){
         headers: { 'Accept': 'application/json' }
       });
       const data = await res.json();
+      if (!res.ok || data.ok === false) {
+        showToast(data.message || 'اختار المقاس واللون قبل إضافة المنتج للسلة');
+        return;
+      }
       showToast(data.message || 'تمت إضافة المنتج للسلة بنجاح');
     } catch (err) {
       showToast('حصلت مشكلة، جرب تاني');
