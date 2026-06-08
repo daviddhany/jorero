@@ -54,8 +54,18 @@ router.post('/cart/add/:id', async (req, res) => {
   // Some colors are chosen by clicking the color image, so we also fallback
   // to the color name linked with that image if the select value is empty.
   const selectedColorImage = (product.colorImages || []).find(item => item.image === selectedImage);
+  const productSizes = (product.sizes || []).filter(Boolean);
+  const productColors = [...new Set([...(product.colors || []), ...((product.colorImages || []).map(item => item.color))].filter(Boolean))];
   const selectedSize = String(req.body.size || '').trim();
   const selectedColor = String(req.body.color || selectedColorImage?.color || '').trim();
+
+  if ((productSizes.length && !selectedSize) || (productColors.length && !selectedColor)) {
+    const message = 'اختار المقاس واللون قبل إضافة المنتج للسلة';
+    if (req.xhr || req.headers.accept?.includes('application/json')) {
+      return res.status(400).json({ ok: false, message });
+    }
+    return res.redirect('/product/' + product._id);
+  }
 
   const item = {
     product: product._id.toString(),

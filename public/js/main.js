@@ -98,9 +98,19 @@ function showColorPhoto(image, color){
   updateThumbActive(image);
   document.querySelectorAll('.color-photo-options button').forEach(btn => {
     const img = btn.querySelector('img');
-    btn.classList.toggle('active', img && img.getAttribute('src') === image);
+    const isActive = (btn.dataset.image === image) || (img && img.getAttribute('src') === image);
+    btn.classList.toggle('active', isActive);
   });
 }
+
+// Color image buttons: keeps the customer's clicked color inside the form.
+(function(){
+  document.querySelectorAll('.color-photo-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      showColorPhoto(btn.dataset.image || '', btn.dataset.color || '');
+    });
+  });
+})();
 
 
 // Add to cart without leaving product page
@@ -123,6 +133,18 @@ function showColorPhoto(image, color){
 
   form.addEventListener('submit', async function(e){
     e.preventDefault();
+
+    const colorSelect = form.querySelector('[name="color"]');
+    const activeColorBtn = document.querySelector('.color-photo-btn.active');
+    if (colorSelect && !colorSelect.value && activeColorBtn && activeColorBtn.dataset.color) {
+      setSelectedColorValue(activeColorBtn.dataset.color);
+    }
+
+    if (!form.checkValidity()) {
+      form.reportValidity();
+      return;
+    }
+
     const btn = form.querySelector('button');
     const oldText = btn ? btn.textContent : '';
     if (btn) { btn.disabled = true; btn.textContent = 'جاري الإضافة...'; }
