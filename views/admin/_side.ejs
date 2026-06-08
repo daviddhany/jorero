@@ -1,0 +1,17 @@
+<aside class="side">
+  <img src="/public/images/logo.png" alt="Jorero">
+  <h2>لوحة التحكم</h2>
+  <p class="admin-role"><%= admin && admin.username ? admin.username : '' %> - <%= admin && admin.role ? admin.role : '' %></p>
+  <a href="/marly-dashboard">المنتجات</a>
+  <a href="/marly-dashboard/orders">الطلبات</a>
+  <a href="/marly-dashboard/reports">تقارير ومبيعات</a>
+  <% if (!admin || ['super_admin','admin','manager'].includes(admin.role)) { %>
+    <a href="/marly-dashboard/products/new">إضافة منتج</a>
+    <a href="/marly-dashboard/settings">تخصيص الواجهة</a>
+  <% } %>
+  <% if (admin && ['super_admin','admin'].includes(admin.role)) { %>
+    <a href="/marly-dashboard/admins">المستخدمين والصلاحيات</a>
+  <% } %>
+  <a href="/" target="_blank">عرض الموقع</a>
+  <form method="post" action="/marly-dashboard/logout"><button>تسجيل خروج</button></form>
+</aside>

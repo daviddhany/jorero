@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title><%= title %></title><link rel="stylesheet" href="/public/css/style.css"></head>
+<body>
+<div class="admin-layout">
+  <%- include('_side') %>
+  <main class="admin-main">
+    <div class="admin-head"><h1>تقارير ومبيعات</h1></div>
+    <div class="stats-grid">
+      <div class="stat-card"><span>مبيعات اليوم</span><b><%= formatPrice(stats.todaySales) %></b></div>
+      <div class="stat-card"><span>مبيعات الشهر</span><b><%= formatPrice(stats.monthSales) %></b></div>
+      <div class="stat-card"><span>إجمالي المبيعات</span><b><%= formatPrice(stats.totalSales) %></b></div>
+      <div class="stat-card"><span>عدد الطلبات</span><b><%= stats.ordersCount %></b></div>
+      <div class="stat-card"><span>متوسط الطلب</span><b><%= formatPrice(stats.averageOrder) %></b></div>
+      <div class="stat-card"><span>طلبات مفتوحة</span><b><%= stats.pendingCount %></b></div>
+      <div class="stat-card"><span>عدد المنتجات</span><b><%= stats.productsCount %></b></div>
+    </div>
+
+    <div class="report-panels">
+      <section class="report-card">
+        <h2>الطلبات حسب الحالة</h2>
+        <table><thead><tr><th>الحالة</th><th>العدد</th></tr></thead><tbody>
+          <% Object.keys(STATUS_LABELS).forEach(s => { %>
+            <tr><td><%= STATUS_LABELS[s] %></td><td><%= stats.byStatus[s] || 0 %></td></tr>
+          <% }) %>
+        </tbody></table>
+      </section>
+
+      <section class="report-card">
+        <h2>أفضل المنتجات مبيعًا</h2>
+        <% if(!topProducts.length){ %><div class="empty">لا توجد مبيعات حتى الآن.</div><% } else { %>
+          <table><thead><tr><th>المنتج</th><th>الكمية</th><th>المبيعات</th></tr></thead><tbody>
+            <% topProducts.forEach(p => { %><tr><td><%= p.name %></td><td><%= p.qty %></td><td><%= formatPrice(p.total) %></td></tr><% }) %>
+          </tbody></table>
+        <% } %>
+      </section>
+    </div>
+  </main>
+</div>
+</body>
+</html>

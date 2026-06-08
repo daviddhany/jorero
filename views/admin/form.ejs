@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title><%= title %></title>
+  <link rel="stylesheet" href="/public/css/style.css">
+</head>
+<body>
+<div class="admin-layout">
+  <%- include('_side') %>
+
+  <main class="admin-main">
+    <h1><%= title %></h1>
+
+    <form class="product-form" method="post" enctype="multipart/form-data" action="<%= product ? '/marly-dashboard/products/' + product._id + '?_method=PUT' : '/marly-dashboard/products' %>">
+      <label>اسم المنتج
+        <input name="name" required value="<%= product ? product.name : '' %>">
+      </label>
+
+      <label>الفئة
+        <select name="category">
+          <% ['رجالي','حريمي','أطفالي','تيشيرتات','قمصان','بناطيل','جينز','أطقم','فساتين','سويت شيرت'].forEach(c => { %>
+            <option <%= product && product.category == c ? 'selected' : '' %>><%= c %></option>
+          <% }) %>
+        </select>
+      </label>
+
+      <label>السعر
+        <input type="number" name="price" required value="<%= product ? product.price : '' %>">
+      </label>
+
+      <label>السعر قبل الخصم
+        <input type="number" name="oldPrice" value="<%= product && product.oldPrice ? product.oldPrice : '' %>">
+      </label>
+
+      <label>نص العرض
+        <input name="offerText" value="<%= product && product.offerText ? product.offerText : '' %>" placeholder="مثال: اشتري 2 وخد خصم 50%">
+      </label>
+
+      <label>عدد القطع في العرض
+        <input type="number" min="0" name="offerBuyQty" value="<%= product && product.offerBuyQty ? product.offerBuyQty : '' %>" placeholder="مثال: 2">
+      </label>
+
+      <label>نسبة الخصم %
+        <input type="number" min="0" max="100" name="offerDiscountPercent" value="<%= product && product.offerDiscountPercent ? product.offerDiscountPercent : '' %>" placeholder="مثال: 50">
+      </label>
+
+      <label>الكمية المتاحة
+        <input type="number" name="stock" value="<%= product ? product.stock : 1 %>" placeholder="الكمية المتاحة">
+      </label>
+
+      <%
+        const selectedProductSizes = product && product.sizes ? product.sizes : [];
+        const adminDefaultSizes = settings && settings.defaultSizes && settings.defaultSizes.length ? settings.defaultSizes : ['2','4','6','8','S','M','L','XL','XXL','3XL','4XL'];
+        const sizeOptions = [...new Set([...adminDefaultSizes, ...selectedProductSizes])];
+      %>
+      <div class="full option-block">
+        <h3>المقاسات المتاحة</h3>
+        <p>مقاسات الأطفال 2 / 4 / 6 / 8 موجودة تلقائيًا. تقدر تزود المقاسات العامة من صفحة الإعدادات أو تضيف مقاس خاص للمنتج من الخانة اليدوية.</p>
+        <div class="checkbox-grid">
+          <% sizeOptions.forEach(size => { %>
+            <label><input type="checkbox" name="sizes" value="<%= size %>" <%= product && (product.sizes || []).includes(size) ? 'checked' : '' %>> <%= size %></label>
+          <% }) %>
+        </div>
+        <label class="manual-option">مقاسات إضافية لهذا المنتج فقط
+          <input name="customSizes" placeholder="مثال: 10, 12, 5XL, Free Size">
+        </label>
+      </div>
+
+      <div class="full option-block">
+        <h3>الألوان المتاحة</h3>
+        <div class="checkbox-grid colors-checks">
+          <% ['أبيض','أسود','أخضر','كحلي','بيج','رمادي','وردي','أحمر','زيتوني','أزرق','بني'].forEach(color => { %>
+            <label><input type="checkbox" name="colors" value="<%= color %>" <%= product && (product.colors || []).includes(color) ? 'checked' : '' %>> <%= color %></label>
+          <% }) %>
+        </div>
+        <label class="manual-option">ألوان إضافية يدويًا
+          <input name="customColors" placeholder="مثال: سماوي, نبيتي, موف">
+        </label>
+      </div>
+
+      <label class="full">الوصف
+        <textarea name="description"><%= product ? product.description : '' %></textarea>
+      </label>
+
+      <div class="full upload-pro">
+        <h3>رفع صور احترافي</h3>
+        <p>اسحب الصور هنا أو اختارها من جهازك. سيتم ضغطها وتحويلها WebP تلقائيًا إذا كانت مكتبة sharp مثبتة.</p>
+        <label class="drop-zone" id="productDropZone">اضغط أو اسحب الصور هنا
+          <input id="productImagesInput" type="file" name="images" multiple accept="image/*">
+        </label>
+        <div id="productPreview" class="upload-preview"></div>
+      </div>
+
+      <div class="full color-image-upload option-block">
+        <h3>صور الألوان</h3>
+        <p>اكتب اسم اللون وارفع صورته. العميل هيضغط على اللون في صفحة المنتج فتتغير الصورة.</p>
+        <div id="colorImageRows">
+          <div class="color-image-row">
+            <input name="colorImageNames" placeholder="مثال: أخضر">
+            <input type="file" name="colorImages" accept="image/*">
+          </div>
+          <div class="color-image-row">
+            <input name="colorImageNames" placeholder="مثال: أبيض">
+            <input type="file" name="colorImages" accept="image/*">
+          </div>
+          <div class="color-image-row">
+            <input name="colorImageNames" placeholder="مثال: كحلي">
+            <input type="file" name="colorImages" accept="image/*">
+          </div>
+        </div>
+        <button type="button" class="btn light small" onclick="addColorImageRow()">+ إضافة لون بصورة</button>
+      </div>
+
+      <% if (product && product.colorImages && product.colorImages.length) { %>
+        <div class="full admin-images-block">
+          <h3>صور الألوان الحالية</h3>
+          <p>علّم على لون معيّن لو عايز تمسحه ثم اضغط حفظ المنتج.</p>
+          <div class="admin-photo-grid">
+            <% product.colorImages.forEach(item => { %>
+              <label class="admin-photo-item">
+                <img src="<%= item.image %>" alt="<%= item.color %>" onerror="this.onerror=null;this.src='/public/images/logo.png'">
+                <b><%= item.color %></b>
+                <span><input type="checkbox" name="removeColorImages" value='<%- JSON.stringify({ color: item.color, image: item.image }) %>'> حذف اللون والصورة</span>
+              </label>
+            <% }) %>
+          </div>
+        </div>
+      <% } %>
+
+      <% if (product && product.images && product.images.length) { %>
+        <div class="full admin-images-block">
+          <h3>صور المنتج الحالية</h3>
+          <p>علّم على الصور اللي عايز تمسحها ثم اضغط حفظ المنتج.</p>
+          <div class="admin-photo-grid">
+            <% product.images.forEach(img => { %>
+              <label class="admin-photo-item">
+                <img src="<%= img %>" alt="صورة المنتج" onerror="this.onerror=null;this.src='/public/images/logo.png'">
+                <span><input type="checkbox" name="removeImages" value="<%= img %>"> حذف الصورة</span>
+              </label>
+            <% }) %>
+          </div>
+        </div>
+      <% } %>
+
+      <div class="checks full">
+        <label><input type="checkbox" name="featured" <%= product && product.featured ? 'checked' : '' %>> مميز</label>
+        <label><input type="checkbox" name="bestSeller" <%= product && product.bestSeller ? 'checked' : '' %>> الأكثر طلبًا</label>
+        <label><input type="checkbox" name="newArrival" <%= product && product.newArrival ? 'checked' : '' %>> وصل حديثًا</label>
+        <label><input type="checkbox" name="offer" <%= product && product.offer ? 'checked' : '' %>> منتج عليه عرض</label>
+        <label><input type="checkbox" name="active" <%= !product || product.active ? 'checked' : '' %>> ظاهر</label>
+      </div>
+
+      <button class="btn big">حفظ المنتج</button>
+    </form>
+  </main>
+</div>
+<script>
+function addColorImageRow(){
+  const wrap = document.getElementById('colorImageRows');
+  if(!wrap) return;
+  const row = document.createElement('div');
+  row.className = 'color-image-row';
+  row.innerHTML = '<input name="colorImageNames" placeholder="اسم اللون"><input type="file" name="colorImages" accept="image/*"><button type="button" class="danger" onclick="this.parentElement.remove()">حذف</button>';
+  wrap.appendChild(row);
+}
+</script>
+<script>
+(function(){
+  const input = document.getElementById('productImagesInput');
+  const preview = document.getElementById('productPreview');
+  const zone = document.getElementById('productDropZone');
+  if(!input || !preview || !zone) return;
+  function showPreview(files){
+    preview.innerHTML = '';
+    Array.from(files || []).forEach(file => {
+      if(!file.type.startsWith('image/')) return;
+      const card = document.createElement('div');
+      card.className = 'preview-card';
+      const img = document.createElement('img');
+      img.src = URL.createObjectURL(file);
+      const span = document.createElement('span');
+      span.textContent = file.name;
+      card.appendChild(img); card.appendChild(span); preview.appendChild(card);
+    });
+  }
+  input.addEventListener('change', () => showPreview(input.files));
+  ['dragenter','dragover'].forEach(ev => zone.addEventListener(ev, e => { e.preventDefault(); zone.classList.add('drag'); }));
+  ['dragleave','drop'].forEach(ev => zone.addEventListener(ev, e => { e.preventDefault(); zone.classList.remove('drag'); }));
+  zone.addEventListener('drop', e => { input.files = e.dataTransfer.files; showPreview(input.files); });
+})();
+</script>
+</body>
+</html>

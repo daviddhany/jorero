@@ -1,0 +1,9 @@
+<%- include('partials/header') %>
+<section class="page-head"><div><span class="eyebrow">السلة</span><h1>طلباتك</h1><p>راجع المنتجات قبل إتمام الطلب.</p></div></section>
+<section class="cart-page">
+  <% if(!items.length){ %><div class="empty"><h2>السلة فاضية</h2><a class="btn" href="/products">تسوق الآن</a></div><% } else { %>
+    <div class="cart-list"><% items.forEach((item,index)=>{ %><div class="cart-item"><img src="<%= item.image %>" onerror="this.onerror=null;this.src='/public/images/logo.png'"><div><h3><%= item.name %></h3><p>المقاس: <%= item.size || '-' %> | اللون: <%= item.color || '-' %></p><p><%= item.quantity %> × <%= formatPrice(item.price) %></p></div><b><%= formatPrice(item.subtotal) %></b><form method="post" action="/cart/remove/<%= index %>"><button class="danger">حذف</button></form></div><% }) %></div>
+    <div class="cart-summary"><h2>الإجمالي</h2><p>المنتجات: <b><%= formatPrice(totals.itemsTotal) %></b></p><p>التوصيل: <b><%= formatPrice(totals.deliveryPrice) %></b></p><h3>الإجمالي النهائي: <%= formatPrice(totals.total) %></h3><a class="btn big" href="/checkout">إتمام الطلب</a></div>
+  <% } %>
+</section>
+<%- include('partials/footer') %>

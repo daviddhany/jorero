@@ -1,0 +1,14 @@
+require('dotenv').config();
+const mongoose=require('mongoose'); const bcrypt=require('bcryptjs');
+const Admin=require('../models/Admin'); const Product=require('../models/Product'); const Setting=require('../models/Setting');
+const uri=process.env.MONGODB_URI||'mongodb://127.0.0.1:27017/jorero_shop';
+const products=[
+{name:'Jorero Polo Set',category:'رجالي',price:900,oldPrice:1100,images:['/public/uploads/polo-set-900.jpg'],offerText:'طقم بولو بسعر خاص',description:'طقم رجالي كاجوال مناسب للخروج اليومي.',sizes:['M','L','XL','XXL'],colors:['أخضر','كحلي'],featured:true,bestSeller:true,offer:true,newArrival:true},
+{name:'Two Polo Offer',category:'تيشيرتات',price:850,oldPrice:1000,images:['/public/uploads/two-polo-850.jpg'],offerText:'قطعتين بولو بسعر خاص',description:'بولو ألوان مختلفة وخامة ممتازة.',sizes:['M','L','XL','XXL'],colors:['أخضر','بيج','أحمر'],featured:true,bestSeller:true,offer:true},
+{name:'Pink Cotton Shirt',category:'حريمي',price:1050,oldPrice:1250,images:['/public/uploads/pink-shirt-1050.jpg'],description:'قميص كاجوال بلون هادي.',sizes:['S','M','L','XL'],colors:['وردي'],newArrival:true},
+{name:'Olive Shirt',category:'قمصان',price:900,oldPrice:1100,images:['/public/uploads/olive-shirt-900.jpg'],description:'قميص عملي وخفيف.',sizes:['M','L','XL'],colors:['زيتوني'],bestSeller:true},
+{name:'White Shirt',category:'قمصان',price:900,oldPrice:1100,images:['/public/uploads/white-shirt-900.jpg'],description:'قميص أبيض كلاسيك.',sizes:['M','L','XL','XXL'],colors:['أبيض'],featured:true},
+{name:'CK Grey Shirt',category:'رجالي',price:1050,oldPrice:1300,images:['/public/uploads/ck-shirt-1050.jpg'],description:'قميص رمادي بتصميم عصري.',sizes:['M','L','XL'],colors:['رمادي'],featured:true}
+];
+async function seed(){await mongoose.connect(uri); const username=process.env.ADMIN_USERNAME||'admin', password=process.env.ADMIN_PASSWORD||'12345'; await Admin.findOneAndUpdate({username},{username,password:await bcrypt.hash(password,10),role:'super_admin',active:true},{upsert:true}); if(await Product.countDocuments()===0) await Product.insertMany(products); await Setting.findOneAndUpdate({key:'site'},{key:'site',heroEyebrow:'JORERO ONLINE SHOP',heroTitle:'Wear your mood',heroSubtitle:'نحن متخصصين في تصنيع وبيع الملابس الرجالي والحريمي والأطفالي. هنوفر عليكم لف 3 محلات في محل واحد.',heroPrimaryText:'تسوق الآن',homeNoteTitle:'المصنع والمحل في مكان واحد',homeNoteText:'بنصنع ونورد جملة وقطاعي عشان تلاقي ذوقك ومقاسك بسهولة.',deliveryPrice:50,defaultSizes:['2','4','6','8','S','M','L','XL','XXL','3XL','4XL'],heroImages:['/public/uploads/polo-set-900.jpg','/public/uploads/two-polo-850.jpg','/public/uploads/pink-shirt-1050.jpg']},{upsert:true,setDefaultsOnInsert:true}); console.log('Seed done: admin / 12345'); await mongoose.disconnect();}
+seed().catch(e=>{console.error(e);process.exit(1)});

@@ -1,0 +1,6 @@
+<div class="card">
+  <% const autoOffer = p.offerBuyQty && p.offerDiscountPercent ? ('اشتري ' + p.offerBuyQty + ' وخد خصم ' + p.offerDiscountPercent + '%') : ''; %>
+  <% if (p.offer) { %><div class="ribbon"><%= p.offerText || autoOffer || 'عرض خاص' %></div><% } %>
+  <a href="/product/<%= p._id %>"><img src="<%= (p.images && p.images[0]) || '/public/images/logo.png' %>" alt="<%= p.name %>" onerror="this.onerror=null;this.src='/public/images/logo.png'"></a>
+  <div class="card-body"><span class="tag"><%= p.category %></span><h3><%= p.name %></h3><% if (p.offerText || autoOffer) { %><p class="offer-line"><%= p.offerText || autoOffer %></p><% } %><p class="price"><b><%= formatPrice(p.price) %></b> <% if(p.oldPrice){ %><del><%= formatPrice(p.oldPrice) %></del><% } %></p><a class="btn ghost" href="/product/<%= p._id %>">اختار المنتج</a></div>
+</div>

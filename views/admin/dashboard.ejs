@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title><%= title %></title>
+  <link rel="stylesheet" href="/public/css/style.css">
+</head>
+<body>
+  <div class="admin-layout">
+    <%- include('_side') %>
+
+    <main class="admin-main">
+      <div class="admin-head">
+        <h1>المنتجات</h1>
+        <a class="btn" href="/marly-dashboard/products/new">+ إضافة منتج</a>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>الصورة</th>
+            <th>الاسم</th>
+            <th>الفئة</th>
+            <th>السعر</th>
+            <th>الحالة</th>
+            <th>تحكم</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% products.forEach(p => { const img = (p.images && p.images.length) ? p.images[0] : '/public/images/logo.png'; %>
+            <tr>
+              <td><img class="mini" src="<%= img %>" alt="<%= p.name %>" onerror="this.onerror=null;this.src='/public/images/logo.png'"></td>
+              <td><%= p.name %></td>
+              <td><%= p.category %></td>
+              <td><%= formatPrice(p.price) %></td>
+              <td><%= p.active ? 'ظاهر' : 'مخفي' %></td>
+              <td>
+                <a class="btn small" href="/marly-dashboard/products/<%= p._id %>/edit">تعديل</a>
+                <form class="inline" method="post" action="/marly-dashboard/products/<%= p._id %>?_method=DELETE">
+                  <button class="danger">حذف</button>
+                </form>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </main>
+  </div>
+</body>
+</html>

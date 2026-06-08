@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title><%= title %></title><link rel="stylesheet" href="/public/css/style.css"></head>
+<body>
+<div class="admin-layout">
+  <%- include('_side') %>
+  <main class="admin-main">
+    <div class="admin-head"><h1>المستخدمين والصلاحيات</h1></div>
+    <% if(error){ %><div class="error"><%= error %></div><% } %>
+    <form class="product-form compact-form" method="post" action="/marly-dashboard/admins">
+      <label>Username<input name="username" required></label>
+      <label>Password<input name="password" required></label>
+      <label>Role<select name="role"><% ROLES.forEach(r => { %><option value="<%= r %>"><%= ROLE_LABELS[r] %></option><% }) %></select></label>
+      <label class="checkline"><input type="checkbox" name="active" checked> Active</label>
+      <button class="btn">إضافة مستخدم</button>
+    </form>
+
+    <table>
+      <thead><tr><th>Username</th><th>Role</th><th>Active</th><th>تعديل</th></tr></thead>
+      <tbody>
+        <% admins.forEach(a => { %>
+          <tr>
+            <form method="post" action="/marly-dashboard/admins/<%= a._id %>">
+              <td><%= a.username %></td>
+              <td><select name="role"><% ROLES.forEach(r => { %><option value="<%= r %>" <%= a.role === r ? 'selected' : '' %>><%= ROLE_LABELS[r] %></option><% }) %></select></td>
+              <td><input type="checkbox" name="active" <%= a.active !== false ? 'checked' : '' %>></td>
+              <td><input name="password" placeholder="Password جديد اختياري"><button class="btn small">حفظ</button></td>
+            </form>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </main>
+</div>
+</body>
+</html>

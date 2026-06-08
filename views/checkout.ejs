@@ -1,0 +1,14 @@
+<%- include('partials/header') %>
+<section class="page-head"><div><span class="eyebrow">Checkout</span><h1>إتمام الطلب</h1><p>اكتب بياناتك وسيظهر الطلب للأدمن.</p></div></section>
+<section class="checkout-page">
+  <form class="checkout-form" method="post" action="/checkout">
+    <% if(error){ %><div class="error"><%= error %></div><% } %>
+    <label>الاسم بالكامل<input name="customerName" required placeholder="اسم العميل"></label>
+    <label>رقم التليفون<input name="phone" required pattern="01[0-9]{9}" minlength="11" maxlength="11" inputmode="numeric" placeholder="01012345678" title="رقم التليفون لازم يكون 11 رقم ويبدأ بـ 01"></label>
+    <label>العنوان بالتفصيل<textarea name="address" required placeholder="المحافظة، المنطقة، الشارع، رقم البيت، علامة مميزة"></textarea></label>
+    <label>ملاحظات إضافية<textarea name="notes" placeholder="اختياري"></textarea></label>
+    <button class="btn big">تأكيد الطلب</button>
+  </form>
+  <aside class="cart-summary"><h2>ملخص الطلب</h2><% items.forEach(item=>{ %><p><%= item.name %> × <%= item.quantity %> — <b><%= formatPrice(item.subtotal) %></b></p><% }) %><hr><p>المنتجات: <b><%= formatPrice(totals.itemsTotal) %></b></p><p>التوصيل: <b><%= formatPrice(totals.deliveryPrice) %></b></p><h3>الإجمالي: <%= formatPrice(totals.total) %></h3></aside>
+</section>
+<%- include('partials/footer') %>

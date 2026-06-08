@@ -1,0 +1,48 @@
+<%- include('partials/header') %>
+
+<section class="hero showroom-hero showroom-full">
+  <div class="hero-content">
+    <span class="eyebrow"><%= settings.heroEyebrow %></span>
+    <h1><%= settings.heroTitle %></h1>
+    <p><%= settings.heroSubtitle %></p>
+    <div class="hero-actions">
+      <a class="btn big" href="/products"><%= settings.heroPrimaryText || 'تسوق الآن' %></a>
+      <a class="btn light" href="/cart">افتح السلة</a>
+    </div>
+  </div>
+  <% const heroImages = (settings.heroImages && settings.heroImages.length ? settings.heroImages : [settings.heroImage || '/public/uploads/polo-set-900.jpg']).filter(Boolean); %>
+  <div class="hero-media hero-carousel" data-carousel>
+    <% heroImages.forEach((img, index) => { %>
+      <img class="hero-slide <%= index === 0 ? 'active' : '' %>" src="<%= img %>" alt="Jorero <%= index + 1 %>" onerror="this.onerror=null;this.src='/public/images/logo.png'">
+    <% }) %>
+    <% if (heroImages.length > 1) { %><div class="hero-dots"><% heroImages.forEach((img, index) => { %><span class="<%= index === 0 ? 'active' : '' %>"></span><% }) %></div><% } %>
+    <div class="floating-card"><%= settings.homeNoteTitle || 'Online Shop' %><br><b>اطلب دلوقتي</b></div>
+  </div>
+</section>
+
+<section class="showroom-note-wide"><b><%= settings.homeNoteTitle %></b><span><%= settings.homeNoteText %></span></section>
+
+<section class="features ux-strip">
+  <div><b>رجالي</b><span>موديلات ومقاسات متنوعة</span></div>
+  <div><b>حريمي</b><span>اختيارات تناسب كل الأذواق</span></div>
+  <div><b>أطفالي</b><span>كل العائلة من مكان واحد</span></div>
+  <div><b>تصنيع مباشر</b><span>جملة وقطاعي</span></div>
+</section>
+
+<section>
+  <h2>تصفح حسب الفئة</h2>
+  <div class="cats visual-cats">
+    <a href="/products?category=رجالي">رجالي</a>
+    <a href="/products?category=حريمي">حريمي</a>
+    <a href="/products?category=أطفالي">أطفالي</a>
+    <a href="/products?category=تيشيرتات">تيشيرتات</a>
+    <a href="/products?category=قمصان">قمصان</a>
+    <a href="/products?category=بناطيل">بناطيل</a>
+  </div>
+</section>
+
+<section><div class="section-title"><h2>منتجات مميزة</h2><a href="/products">عرض الكل</a></div><div class="grid"><% products.filter(p=>p.featured).slice(0,4).forEach(p=>{ %><%- include('partials/card',{p}) %><% }) %></div></section>
+<section><div class="section-title"><h2>وصل حديثًا</h2><a href="/products">كل المنتجات</a></div><div class="grid"><% products.filter(p=>p.newArrival).slice(0,4).forEach(p=>{ %><%- include('partials/card',{p}) %><% }) %></div></section>
+
+<section class="visit-box" id="contact"><h2>بيانات التواصل</h2><p><%= info.address %></p><div class="visit-grid"><div>📱 <b>01016002162</b></div><div>واتساب <b>01212227833</b></div><div><a class="btn" target="_blank" href="https://wa.me/<%= info.whatsapp %>">تواصل واتساب</a></div></div></section>
+<%- include('partials/footer') %>

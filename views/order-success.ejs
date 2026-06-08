@@ -1,0 +1,3 @@
+<%- include('partials/header') %>
+<section class="success-box"><h1>تم إرسال طلبك بنجاح ✅</h1><p>رقم الطلب: <b><%= order._id %></b></p><p>الإجمالي: <b><%= formatPrice(order.total) %></b></p><p>هنراجع الطلب ونتواصل معاك على رقم التليفون.</p><a class="btn big" href="/products">تسوق منتجات أخرى</a></section>
+<%- include('partials/footer') %>

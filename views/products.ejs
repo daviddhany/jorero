@@ -1,0 +1,6 @@
+<%- include('partials/header') %>
+<div class="page-head"><div><span class="eyebrow">Jorero Online Shop</span><h1>كل المنتجات</h1><p>اختار المنتج وضيفه للسلة وكمل الطلب.</p></div><button class="filterBtn" onclick="toggleFilter()">☰ الفلاتر</button></div>
+<aside class="filter" id="filter"><button onclick="toggleFilter()">×</button><h3>فلترة المنتجات</h3><form><input name="q" value="<%= q %>" placeholder="بحث باسم المنتج"><select name="category"><option value="">كل الفئات</option><% ['رجالي','حريمي','أطفالي','تيشيرتات','قمصان','بناطيل','جينز','أطقم'].forEach(c=>{ %><option <%= cat==c?'selected':'' %>><%= c %></option><% }) %></select><input name="min" value="<%= min||'' %>" placeholder="أقل سعر"><input name="max" value="<%= max==999999?'':max %>" placeholder="أعلى سعر"><button class="btn">تطبيق الفلتر</button><a class="btn light" href="/products">إلغاء الفلتر</a></form></aside>
+<div class="grid products-grid"><% products.forEach(p=>{ %><%- include('partials/card',{p}) %><% }) %></div>
+<% if(!products.length){ %><div class="empty">لا توجد منتجات مطابقة للبحث حاليًا.</div><% } %>
+<%- include('partials/footer') %>

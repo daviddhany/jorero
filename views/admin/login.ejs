@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title><%= title %></title>
+  <link rel="stylesheet" href="/public/css/style.css">
+</head>
+<body>
+  <main class="admin-login">
+    <form class="login-box" method="post" action="/marly-dashboard/login">
+      <img src="/public/images/logo.png" alt="Jorero">
+      <h1>دخول لوحة التحكم</h1>
+      <p class="admin-login-page-note">هذه الصفحة لإدارة منتجات وطلبات Jorero فقط</p>
+      <% if(error){ %><p class="error"><%= error %></p><% } %>
+      <input name="username" placeholder="اسم المستخدم" required autofocus>
+      <input type="password" name="password" placeholder="كلمة المرور" required>
+      <button class="btn big">دخول</button>
+      <a class="btn light" href="/">العودة للموقع</a>
+    </form>
+  </main>
+</body>
+</html>
