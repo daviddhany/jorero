@@ -1,3 +1,22 @@
 <!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title><%= typeof title !== 'undefined' ? title : 'Jorero' %></title><meta name="description" content="Jorero Online Shop - ملابس رجالي وحريمي وأطفالي"><link rel="icon" href="/public/images/logo.png"><link rel="stylesheet" href="/public/css/style.css"></head><body>
 <div class="topbar">📍 <%= typeof info!='undefined'?info.address:'' %> &nbsp; ☎ 01016002162 &nbsp; | &nbsp; Online shop - اطلب من الموقع</div>
-<header class="header"><a class="brand" href="/"><img id="secretAdminLogo" src="/public/images/logo.png" alt="Jorero"><div><b>Jorero</b><span>Wear your mood</span></div></a><form class="search" action="/products"><input name="q" placeholder="ابحث عن منتج..."><button>بحث</button></form><nav><a href="/">الرئيسية</a><a href="/products">المنتجات</a><a href="/cart">السلة</a><a href="/#contact">التواصل</a></nav></header>
+<header class="header">
+  <a class="brand" href="/">
+    <img id="secretAdminLogo" src="/public/images/logo.png" alt="Jorero">
+    <div><b>Jorero</b><span>Wear your mood</span></div>
+  </a>
+
+  <button class="mobile-menu-btn" type="button" aria-label="فتح القائمة" aria-expanded="false">☰</button>
+
+  <form class="search" action="/products">
+    <input name="q" placeholder="ابحث عن منتج...">
+    <button>بحث</button>
+  </form>
+
+  <nav class="main-nav">
+    <a href="/">الرئيسية</a>
+    <a href="/products">المنتجات</a>
+    <a href="/cart">السلة</a>
+    <a href="/#contact">التواصل</a>
+  </nav>
+</header>

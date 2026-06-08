@@ -126,3 +126,25 @@ function showColorPhoto(image){
     }
   });
 })();
+
+
+// Mobile hamburger menu
+(function(){
+  const header = document.querySelector('.header');
+  const btn = document.querySelector('.mobile-menu-btn');
+  if (!header || !btn) return;
+
+  btn.addEventListener('click', function(){
+    const isOpen = header.classList.toggle('menu-open');
+    btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    btn.textContent = isOpen ? '×' : '☰';
+  });
+
+  header.querySelectorAll('.main-nav a, nav a').forEach(function(link){
+    link.addEventListener('click', function(){
+      header.classList.remove('menu-open');
+      btn.setAttribute('aria-expanded', 'false');
+      btn.textContent = '☰';
+    });
+  });
+})();
