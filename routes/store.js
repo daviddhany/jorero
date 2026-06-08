@@ -48,13 +48,22 @@ router.post('/cart/add/:id', async (req, res) => {
   const product = await Product.findById(req.params.id).lean();
   if (!product || !product.active) return res.redirect('/products');
   const quantity = Math.max(1, Number(req.body.quantity || 1));
+  const selectedImage = req.body.image || (product.images && product.images[0]) || '/public/images/logo.png';
+
+  // Keep the exact customer choices in the basket/order.
+  // Some colors are chosen by clicking the color image, so we also fallback
+  // to the color name linked with that image if the select value is empty.
+  const selectedColorImage = (product.colorImages || []).find(item => item.image === selectedImage);
+  const selectedSize = String(req.body.size || '').trim();
+  const selectedColor = String(req.body.color || selectedColorImage?.color || '').trim();
+
   const item = {
     product: product._id.toString(),
     name: product.name,
     price: Number(product.price || 0),
-    image: (req.body.image || (product.images && product.images[0]) || '/public/images/logo.png'),
-    size: req.body.size || '',
-    color: req.body.color || '',
+    image: selectedImage,
+    size: selectedSize,
+    color: selectedColor,
     quantity,
     subtotal: Number(product.price || 0) * quantity
   };

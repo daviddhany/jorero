@@ -9,6 +9,6 @@
     <label>ملاحظات إضافية<textarea name="notes" placeholder="اختياري"></textarea></label>
     <button class="btn big">تأكيد الطلب</button>
   </form>
-  <aside class="cart-summary"><h2>ملخص الطلب</h2><% items.forEach(item=>{ %><p><%= item.name %> × <%= item.quantity %> — <b><%= formatPrice(item.subtotal) %></b></p><% }) %><hr><p>المنتجات: <b><%= formatPrice(totals.itemsTotal) %></b></p><p>التوصيل: <b><%= formatPrice(totals.deliveryPrice) %></b></p><h3>الإجمالي: <%= formatPrice(totals.total) %></h3></aside>
+  <aside class="cart-summary"><h2>ملخص الطلب</h2><% items.forEach(item=>{ %><div class="summary-item"><p><b><%= item.name %></b></p><p>المقاس: <%= item.size || '-' %> | اللون: <%= item.color || '-' %></p><p>الكمية: <%= item.quantity %> — <b><%= formatPrice(item.subtotal) %></b></p></div><% }) %><hr><p>المنتجات: <b><%= formatPrice(totals.itemsTotal) %></b></p><p>التوصيل: <b><%= formatPrice(totals.deliveryPrice) %></b></p><h3>الإجمالي: <%= formatPrice(totals.total) %></h3></aside>
 </section>
 <%- include('partials/footer') %>

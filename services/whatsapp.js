@@ -41,8 +41,15 @@ function orderCreatedMessage(order) {
   return `أهلاً ${order.customerName}\nتم استلام طلبك من Jorero بنجاح ✅\nرقم الطلب: ${order._id}\nالإجمالي: ${Number(order.total || 0).toLocaleString('ar-EG')} ج\nهنكلمك لتأكيد التفاصيل.`;
 }
 
+function formatOrderItems(order) {
+  return (order.items || []).map((item, index) => {
+    return `${index + 1}) ${item.name} | المقاس: ${item.size || '-'} | اللون: ${item.color || '-'} | الكمية: ${item.quantity || 1} | الإجمالي: ${Number(item.subtotal || 0).toLocaleString('ar-EG')} ج`;
+  }).join('\n');
+}
+
 function ownerNewOrderMessage(order) {
-  return `طلب جديد من Jorero 🛒\nالعميل: ${order.customerName}\nالموبايل: ${order.phone}\nالإجمالي: ${Number(order.total || 0).toLocaleString('ar-EG')} ج\nالعنوان: ${order.address}`;
+  const itemsText = formatOrderItems(order) || '-';
+  return `طلب جديد من Jorero 🛒\nالعميل: ${order.customerName}\nالموبايل: ${order.phone}\nالمنتجات:\n${itemsText}\nالإجمالي: ${Number(order.total || 0).toLocaleString('ar-EG')} ج\nالعنوان: ${order.address}`;
 }
 
 function statusMessage(order) {

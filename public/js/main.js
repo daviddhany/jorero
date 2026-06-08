@@ -75,11 +75,26 @@ function moveProductPhoto(direction){
   if (!images.length) return;
   setProductPhoto(productPhotoIndex + direction);
 }
-function showColorPhoto(image){
+function setSelectedColorValue(color){
+  const select = document.getElementById('selectedColor');
+  if (!select || !color) return;
+
+  // If the admin added a color image without checking the same color in the
+  // normal color list, the select will not contain that value. Add it so the
+  // browser really submits the chosen color instead of submitting an empty value.
+  let option = Array.from(select.options).find(opt => opt.value === color || opt.textContent === color);
+  if (!option) {
+    option = new Option(color, color);
+    select.add(option);
+  }
+  select.value = option.value;
+}
+function showColorPhoto(image, color){
   const main = document.getElementById('mainImg');
   if (main && image) main.src = image;
   const selectedImage = document.getElementById('selectedImage');
   if (selectedImage) selectedImage.value = image;
+  if (color) setSelectedColorValue(color);
   updateThumbActive(image);
   document.querySelectorAll('.color-photo-options button').forEach(btn => {
     const img = btn.querySelector('img');
