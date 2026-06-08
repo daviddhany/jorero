@@ -117,13 +117,17 @@ function showColorPhoto(image){
     const oldText = btn ? btn.textContent : '';
     if (btn) { btn.disabled = true; btn.textContent = 'جاري الإضافة...'; }
     try {
+      const formData = new FormData(form);
       const res = await fetch(form.action, {
         method: 'POST',
-        body: new FormData(form),
-        headers: { 'Accept': 'application/json' }
+        body: new URLSearchParams(formData),
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+        }
       });
       const data = await res.json();
-      showToast(data.message || 'تمت إضافة المنتج للسلة بنجاح');
+      showToast(data.message || (res.ok ? 'تمت إضافة المنتج للسلة بنجاح' : 'اختار اللون والمقاس الأول'));
     } catch (err) {
       showToast('حصلت مشكلة، جرب تاني');
     } finally {
