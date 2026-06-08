@@ -75,39 +75,23 @@ function moveProductPhoto(direction){
   if (!images.length) return;
   setProductPhoto(productPhotoIndex + direction);
 }
-function setSelectedColorValue(color){
-  const select = document.getElementById('colorSelect') || document.getElementById('selectedColor');
-  if (!select || !color) return;
-  const cleanColor = String(color).trim();
-  let option = Array.from(select.options).find(opt => String(opt.value).trim() === cleanColor || String(opt.textContent).trim() === cleanColor);
-  if (!option) {
-    option = new Option(cleanColor, cleanColor);
-    select.add(option);
-  }
-  select.value = option.value;
-  select.dispatchEvent(new Event('change', { bubbles: true }));
-}
-function showColorPhoto(image, color){
+function showColorPhoto(image){
   const main = document.getElementById('mainImg');
   if (main && image) main.src = image;
   const selectedImage = document.getElementById('selectedImage');
   if (selectedImage) selectedImage.value = image;
-  if (color) setSelectedColorValue(color);
   updateThumbActive(image);
-  document.querySelectorAll('.color-photo-options button').forEach(btn => {
-    const isActive = (btn.dataset.image === image) || (String(btn.dataset.color || '').trim() === String(color || '').trim());
-    btn.classList.toggle('active', isActive);
-  });
 }
 
-// Color image buttons: keeps the customer's clicked color inside the real color select.
+// Native product choices: radio inputs submit size/color directly in FormData.
 (function(){
-  document.querySelectorAll('.color-photo-btn').forEach(function(btn){
-    btn.addEventListener('click', function(){
-      showColorPhoto(btn.dataset.image || '', btn.dataset.color || '');
+  document.querySelectorAll('input[name="color"][data-image]').forEach(function(input){
+    input.addEventListener('change', function(){
+      if (input.checked && input.dataset.image) showColorPhoto(input.dataset.image);
     });
   });
 })();
+
 
 // Add to cart without leaving product page
 (function(){
@@ -129,18 +113,6 @@ function showColorPhoto(image, color){
 
   form.addEventListener('submit', async function(e){
     e.preventDefault();
-
-    const activeColorBtn = document.querySelector('.color-photo-btn.active');
-    const colorSelect = document.getElementById('colorSelect') || document.getElementById('selectedColor');
-    if (colorSelect && !colorSelect.value && activeColorBtn && activeColorBtn.dataset.color) {
-      setSelectedColorValue(activeColorBtn.dataset.color);
-    }
-
-    if (!form.checkValidity()) {
-      form.reportValidity();
-      return;
-    }
-
     const btn = form.querySelector('button');
     const oldText = btn ? btn.textContent : '';
     if (btn) { btn.disabled = true; btn.textContent = 'جاري الإضافة...'; }
@@ -151,10 +123,6 @@ function showColorPhoto(image, color){
         headers: { 'Accept': 'application/json' }
       });
       const data = await res.json();
-      if (!res.ok || data.ok === false) {
-        showToast(data.message || 'اختار المقاس واللون قبل إضافة المنتج للسلة');
-        return;
-      }
       showToast(data.message || 'تمت إضافة المنتج للسلة بنجاح');
     } catch (err) {
       showToast('حصلت مشكلة، جرب تاني');
