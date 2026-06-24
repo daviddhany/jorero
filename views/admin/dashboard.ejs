@@ -30,7 +30,7 @@
         <tbody>
           <% products.forEach(p => { const img = (p.images && p.images.length) ? p.images[0] : '/public/images/logo.png'; %>
             <tr>
-              <td><img class="mini" src="<%= img %>" alt="<%= p.name %>" onerror="this.onerror=null;this.src='/public/images/logo.png'"></td>
+              <td><img class="mini" src="<%= img %>" alt="" alt="<%= p.name %>" onerror="this.onerror=null;this.src='/public/images/logo.png'"></td>
               <td><%= p.name %></td>
               <td><%= p.category %></td>
               <td><%= formatPrice(p.price) %></td>
@@ -38,7 +38,7 @@
               <td>
                 <a class="btn small" href="/marly-dashboard/products/<%= p._id %>/edit">تعديل</a>
                 <form class="inline" method="post" action="/marly-dashboard/products/<%= p._id %>?_method=DELETE">
-                  <button class="danger">حذف</button>
+                  <button type="submit" class="danger">حذف</button>
                 </form>
               </td>
             </tr>

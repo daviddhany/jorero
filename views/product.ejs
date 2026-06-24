@@ -1,47 +1,96 @@
 <%- include('partials/header') %>
 <% const imgs = (product.images && product.images.length) ? product.images : ['/public/images/logo.png']; %>
-<% const autoOffer = product.offerBuyQty && product.offerDiscountPercent ? ('اشتري ' + product.offerBuyQty + ' وخد خصم ' + product.offerDiscountPercent + '%') : ''; %>
+<% const autoOffer = product.offerBuyQty && product.offerDiscountPercent ? ('اشتري ' + product.offerBuyQty + ' وخد خصم ' + product.offerDiscountPercent + '%') : ''; const autoOfferEn = product.offerBuyQty && product.offerDiscountPercent ? ('Buy ' + product.offerBuyQty + ' and get ' + product.offerDiscountPercent + '% off') : ''; %>
 <%
   const sizeOptions = [...new Set((product.sizes || []).map(s => String(s || '').trim()).filter(Boolean))];
   const colorMap = new Map();
-  (product.colors || []).forEach(c => {
+  (product.colors || []).forEach((c, i) => {
     const color = String(c || '').trim();
-    if (color) colorMap.set(color, { color, image: '' });
+    const colorEn = String((product.colorsEn || [])[i] || color).trim();
+    if (color) colorMap.set(color, { color, colorEn, image: '' });
   });
   (product.colorImages || []).forEach(item => {
     const color = String(item.color || '').trim();
-    if (color) colorMap.set(color, { color, image: item.image || '' });
+    const colorEn = String(item.colorEn || color).trim();
+    if (color) colorMap.set(color, { color, colorEn, image: item.image || '' });
   });
   const colorOptions = Array.from(colorMap.values());
+  const discountPct = (product.oldPrice && product.price && product.oldPrice > product.price)
+    ? Math.round((1 - product.price / product.oldPrice) * 100) : 0;
 %>
+
+<!-- Breadcrumb -->
+<nav class="product-breadcrumb">
+  <a href="/" data-i18n="home">الرئيسية</a>
+  <span class="bc-sep">›</span>
+  <a href="/products" data-i18n="products">كل المنتجات</a>
+  <% if (product.category) { %>
+    <span class="bc-sep">›</span>
+    <a href="/products?category=<%= encodeURIComponent(product.category) %>" data-ar="<%= product.category %>" data-en="<%= product.categoryEn || product.category %>"><%= product.category %></a>
+  <% } %>
+  <span class="bc-sep">›</span>
+  <span class="bc-cur" data-ar="<%= product.name %>" data-en="<%= product.nameEn || product.name %>"><%= product.name %></span>
+</nav>
+
 <section class="product-detail showroom-detail">
+
+  <!-- ── GALLERY ── -->
   <div class="product-gallery" data-images='<%- JSON.stringify(imgs) %>'>
-    <img id="mainImg" class="main-img" src="<%= imgs[0] %>" alt="<%= product.name %>" onerror="this.onerror=null;this.src='/public/images/logo.png'">
-    <div class="image-stage">
-      <button type="button" class="gallery-arrow gallery-prev" onclick="moveProductPhoto(-1)">‹</button>
-      <button type="button" class="gallery-arrow gallery-next" onclick="moveProductPhoto(1)">›</button>
+    <div class="main-img-wrap">
+      <img id="mainImg" class="main-img" src="<%= imgs[0] %>" alt="" alt="<%= product.name %>" onerror="this.onerror=null;this.src='/public/images/logo.png'">
+      <% if (discountPct > 0) { %><div class="ribbon">-<%= discountPct %>%</div><% } %>
+      <% if (product.newArrival) { %><div style="position:absolute;top:<%= discountPct>0?'54px':'14px' %>;right:14px;z-index:3;background:#1a6b35;color:#fff;border-radius:999px;padding:5px 12px;font-size:12px;font-weight:900;" data-i18n="new">جديد</div><% } %>
+      <div class="image-stage">
+        <button type="button" class="gallery-arrow gallery-prev" onclick="moveProductPhoto(-1)">‹</button>
+        <button type="button" class="gallery-arrow gallery-next" onclick="moveProductPhoto(1)">›</button>
+      </div>
     </div>
     <div class="thumbs" id="productThumbs">
       <% imgs.forEach((img, index) => { %>
-        <img class="<%= index === 0 ? 'active' : '' %>" data-img="<%= img %>" onclick="setProductPhoto(<%= index %>)" src="<%= img %>" alt="<%= product.name %>" onerror="this.onerror=null;this.src='/public/images/logo.png'">
+        <img class="<%= index === 0 ? 'active' : '' %>" alt="" data-img="<%= img %>" onclick="setProductPhoto(<%= index %>)" src="<%= img %>" alt="<%= product.name %>" onerror="this.onerror=null;this.src='/public/images/logo.png'">
       <% }) %>
     </div>
   </div>
 
+  <!-- ── DETAIL PANEL ── -->
   <div class="detail-panel">
-    <span class="tag"><%= product.category %></span>
-    <% if(product.offer){ %><span class="tag offer-tag"><%= product.offerText || autoOffer || 'عرض خاص' %></span><% } %>
-    <h1><%= product.name %></h1>
-    <h2><%= formatPrice(product.price) %> <% if(product.oldPrice){ %><del><%= formatPrice(product.oldPrice) %></del><% } %></h2>
-    <% if(product.offerText || autoOffer){ %><p class="offer-detail">🔥 <%= product.offerText || autoOffer %></p><% } %>
-    <p><%= product.description || '' %></p>
 
+    <!-- Tags -->
+    <div class="detail-tags">
+      <% if (product.category) { %><span class="tag" data-ar="<%= product.category %>" data-en="<%= product.categoryEn || product.category %>"><%= product.category %></span><% } %>
+      <% if (product.newArrival) { %><span class="tag new-tag" data-i18n="new">✦ جديد</span><% } %>
+      <% if (product.offer) { %><span class="tag offer-tag" data-ar="<%= product.offerText || autoOffer || 'عرض خاص' %>" data-en="<%= product.offerTextEn || autoOfferEn || 'Special offer' %>">🔥 <%= product.offerText || autoOffer || 'عرض خاص' %></span><% } %>
+    </div>
+
+    <!-- Name -->
+    <h1 data-ar="<%= product.name %>" data-en="<%= product.nameEn || product.name %>"><%= product.name %></h1>
+
+    <!-- Price block -->
+    <div class="price-block">
+      <span class="price-now"><span class="money" data-price="<%= product.price %>"><%= formatPrice(product.price) %></span></span>
+      <% if (product.oldPrice) { %>
+        <span class="price-was"><span class="money" data-price="<%= product.oldPrice %>"><%= formatPrice(product.oldPrice) %></span></span>
+        <% if (discountPct > 0) { %><span class="save-pill">وفّر <%= discountPct %>%</span><% } %>
+      <% } %>
+    </div>
+
+    <!-- Offer strip -->
+    <% if (product.offerText || autoOffer) { %>
+      <div class="offer-strip">🔥 <span data-ar="<%= product.offerText || autoOffer %>" data-en="<%= product.offerTextEn || autoOfferEn || product.offerText || autoOffer %>"><%= product.offerText || autoOffer %></span></div>
+    <% } %>
+
+    <!-- Description -->
+    <% if (product.description) { %>
+      <p class="product-desc" data-ar="<%= product.description %>" data-en="<%= product.descriptionEn || product.description %>"><%= product.description %></p>
+    <% } %>
+
+    <!-- Buy box -->
     <form class="buy-box" method="post" action="/cart/add/<%= product._id %>">
       <input type="hidden" id="selectedImage" name="image" value="<%= imgs[0] %>">
 
       <% if (sizeOptions.length) { %>
         <div class="option-group">
-          <strong>المقاس</strong>
+          <strong data-i18n="size">المقاس</strong>
           <div class="choice-row size-choice-row">
             <% sizeOptions.forEach((s, index) => { %>
               <label class="choice-pill">
@@ -57,15 +106,13 @@
 
       <% if (colorOptions.length) { %>
         <div class="option-group">
-          <strong>اللون</strong>
+          <strong data-i18n="color">اللون</strong>
           <div class="choice-row color-choice-row">
             <% colorOptions.forEach((item, index) => { %>
               <label class="choice-pill color-choice <%= item.image ? 'has-image' : '' %>">
-                <input type="radio" name="color" value="<%= item.color %>" data-image="<%= item.image || '' %>" <%= index === 0 ? 'required' : '' %>>
-                <% if (item.image) { %>
-                  <img src="<%= item.image %>" alt="<%= item.color %>" onerror="this.onerror=null;this.src='/public/images/logo.png'">
-                <% } %>
-                <span><%= item.color %></span>
+                <input type="radio" name="color" value="<%= item.color %>" data-color-en="<%= item.colorEn || item.color %>" data-image="<%= item.image || '' %>" <%= index === 0 ? 'required' : '' %>>
+                <% if (item.image) { %><img src="<%= item.image %>" alt="" alt="<%= item.color %>" onerror="this.onerror=null;this.src='/public/images/logo.png'"><% } %>
+                <span data-ar="<%= item.color %>" data-en="<%= item.colorEn || item.color %>"><%= item.color %></span>
               </label>
             <% }) %>
           </div>
@@ -74,10 +121,61 @@
         <input type="hidden" name="color" value="">
       <% } %>
 
-      <label>الكمية<input type="number" min="1" name="quantity" value="1" required></label>
-      <button class="btn big">إضافة للسلة</button>
+      <div class="option-group">
+        <strong data-i18n="quantity">الكمية</strong>
+        <div class="qty-row">
+          <button type="button" class="qty-btn-manual" onclick="adjustQty(-1)">−</button>
+          <input type="number" min="1" name="quantity" id="qtyInput" value="1" required>
+          <button type="button" class="qty-btn-manual" onclick="adjustQty(1)">+</button>
+        </div>
+      </div>
+
+      <button type="submit" class="btn big" data-i18n="addToCart">🛒 إضافة للسلة</button>
     </form>
-    <div class="hero-actions"><a class="btn light" href="/products">كمل تسوق</a><a class="btn light" href="/cart">افتح السلة</a></div>
+
+    <!-- Favorite button -->
+    <button type="submit" class="fav-detail-btn" id="detailFavBtn"
+      data-fav-id="<%= product._id %>"
+      data-fav-name="<%= (product.name || '').replace(/"/g, '&quot;') %>"
+      data-fav-name-en="<%= (product.nameEn || product.name || '').replace(/"/g, '&quot;') %>"
+      data-fav-price="<%= product.price %>"
+      data-fav-old-price="<%= product.oldPrice || '' %>"
+      data-fav-image="<%= imgs[0] %>"
+      data-fav-url="/product/<%= product._id %>"
+      onclick="toggleFav(this)"
+      type="button">
+      <span class="fav-heart">♡</span>
+      <span class="fav-label">أضف للمفضلة</span>
+    </button>
+
+    <!-- Secondary actions -->
+    <div class="product-sec-row">
+      <a class="btn light" href="/products" data-i18n="continueShopping">← كمل تسوق</a>
+      <a class="btn light" href="/cart" data-i18n="openCart">🛒 افتح السلة</a>
+    </div>
+
+    <!-- Delivery -->
+    <div class="delivery-bar">
+      🚚 <span data-i18n="deliveryLine">التوصيل خلال <b>٢ – ٤ أيام عمل</b></span>
+    </div>
+
+    <!-- Trust -->
+    <div class="trust-row">
+      <div class="trust-item"><span class="trust-icon">🔒</span><span>دفع آمن</span></div>
+      <div class="trust-item"><span class="trust-icon">↩️</span><span>استبدال سهل</span></div>
+      <div class="trust-item"><span class="trust-icon">✅</span><span>جودة مضمونة</span></div>
+      <div class="trust-item"><span class="trust-icon">📞</span><span>دعم ٢٤/٧</span></div>
+    </div>
+
   </div>
 </section>
+
+<script>
+function adjustQty(d){
+  const i=document.getElementById('qtyInput');
+  const v=Math.max(1,parseInt(i.value||1)+d);
+  i.value=v;
+}
+</script>
+
 <%- include('partials/footer') %>

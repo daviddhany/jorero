@@ -32,10 +32,15 @@ router.get('/products', async (req, res) => {
   const min = Number(req.query.min) || 0;
   const max = Number(req.query.max) || 999999;
   let filter = { active: true, price: { $gte: min, $lte: max } };
-  if (q) filter.name = { $regex: q, $options: 'i' };
+  if (q) filter.$or = [{ name: { $regex: q, $options: 'i' } }, { nameEn: { $regex: q, $options: 'i' } }];
   if (cat) filter.category = cat;
   const products = await Product.find(filter).sort('-createdAt').lean();
-  res.render('products', { products, info, q, cat, min, max, title: 'منتجات Jorero' });
+  const settings = await getSettings();
+  res.render('products', { products, info, settings, q, cat, min, max, title: 'منتجات Jorero' });
+});
+
+router.get('/favorites', async (req, res) => {
+  res.render('favorites', { title: 'المفضلة' });
 });
 
 router.get('/product/:id', async (req, res) => {
@@ -56,6 +61,9 @@ router.post('/cart/add/:id', async (req, res) => {
   const selectedColorImage = (product.colorImages || []).find(item => item.image === selectedImage);
   const selectedSize = String(req.body.size || '').trim();
   const selectedColor = String(req.body.color || selectedColorImage?.color || '').trim();
+  const selectedColorByName = (product.colorImages || []).find(item => String(item.color || '').trim() === selectedColor);
+  const selectedColorFromListIndex = (product.colors || []).findIndex(c => String(c || '').trim() === selectedColor);
+  const selectedColorEn = String(req.body.colorEn || selectedColorImage?.colorEn || selectedColorByName?.colorEn || (product.colorsEn || [])[selectedColorFromListIndex] || selectedColor).trim();
 
   const hasSizes = (product.sizes || []).map(s => String(s || '').trim()).filter(Boolean).length > 0;
   const hasColors = [
@@ -66,7 +74,7 @@ router.post('/cart/add/:id', async (req, res) => {
   if ((hasSizes && !selectedSize) || (hasColors && !selectedColor)) {
     const message = 'اختار اللون والمقاس الأول';
     if (req.xhr || req.headers.accept?.includes('application/json')) {
-      return res.status(400).json({ ok: false, message });
+      return res.status(400).json({ ok: false, messageAr: message, messageEn: 'Please choose color and size first' });
     }
     return res.redirect('back');
   }
@@ -74,16 +82,18 @@ router.post('/cart/add/:id', async (req, res) => {
   const item = {
     product: product._id.toString(),
     name: product.name,
+    nameEn: product.nameEn || product.name,
     price: Number(product.price || 0),
     image: selectedImage,
     size: selectedSize,
     color: selectedColor,
+    colorEn: selectedColorEn,
     quantity,
     subtotal: Number(product.price || 0) * quantity
   };
   cart(req).push(item);
   if (req.xhr || req.headers.accept?.includes('application/json')) {
-    return res.json({ ok: true, message: 'تمت إضافة المنتج للسلة بنجاح', cartCount: cart(req).length });
+    return res.json({ ok: true, messageAr: 'تمت إضافة المنتج للسلة بنجاح', messageEn: 'Product added to cart successfully', cartCount: cart(req).length });
   }
   res.redirect('back');
 });

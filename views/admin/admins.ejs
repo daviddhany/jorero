@@ -12,7 +12,7 @@
       <label>Password<input name="password" required></label>
       <label>Role<select name="role"><% ROLES.forEach(r => { %><option value="<%= r %>"><%= ROLE_LABELS[r] %></option><% }) %></select></label>
       <label class="checkline"><input type="checkbox" name="active" checked> Active</label>
-      <button class="btn">إضافة مستخدم</button>
+      <button type="submit" class="btn">إضافة مستخدم</button>
     </form>
 
     <table>
@@ -24,7 +24,7 @@
               <td><%= a.username %></td>
               <td><select name="role"><% ROLES.forEach(r => { %><option value="<%= r %>" <%= a.role === r ? 'selected' : '' %>><%= ROLE_LABELS[r] %></option><% }) %></select></td>
               <td><input type="checkbox" name="active" <%= a.active !== false ? 'checked' : '' %>></td>
-              <td><input name="password" placeholder="Password جديد اختياري"><button class="btn small">حفظ</button></td>
+              <td><input name="password" placeholder="Password جديد اختياري"><button type="submit" class="btn small">حفظ</button></td>
             </form>
           </tr>
         <% }) %>

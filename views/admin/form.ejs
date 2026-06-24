@@ -14,16 +14,30 @@
     <h1><%= title %></h1>
 
     <form class="product-form" method="post" enctype="multipart/form-data" action="<%= product ? '/marly-dashboard/products/' + product._id + '?_method=PUT' : '/marly-dashboard/products' %>">
-      <label>اسم المنتج
+      <label>اسم المنتج عربي
         <input name="name" required value="<%= product ? product.name : '' %>">
       </label>
 
+      <label>اسم المنتج English
+        <input name="nameEn" value="<%= product && product.nameEn ? product.nameEn : '' %>" placeholder="Example: Classic Shirt">
+      </label>
+
       <label>الفئة
-        <select name="category">
-          <% ['رجالي','حريمي','أطفالي','تيشيرتات','قمصان','بناطيل','جينز','أطقم','فساتين','سويت شيرت'].forEach(c => { %>
-            <option <%= product && product.category == c ? 'selected' : '' %>><%= c %></option>
+        <% const categoryOptions = settings && settings.categoryOptions && settings.categoryOptions.length ? settings.categoryOptions : ['رجالي','حريمي','أطفالي','تيشيرتات','قمصان','بناطيل','جينز','أطقم','جاكيت','سويت شيرت']; const categoryOptionsEn = settings && settings.categoryOptionsEn && settings.categoryOptionsEn.length ? settings.categoryOptionsEn : categoryOptions; %>
+        <select name="category" required onchange="syncCategoryEn(this)">
+          <option value="">اختار الفئة</option>
+          <% categoryOptions.forEach((c,i) => { const en = categoryOptionsEn[i] || c; %>
+            <option value="<%= c %>" data-en="<%= en %>" <%= product && product.category == c ? 'selected' : '' %>><%= c %> / <%= en %></option>
           <% }) %>
+          <% if (product && product.category && !categoryOptions.includes(product.category)) { %>
+            <option value="<%= product.category %>" selected><%= product.category %></option>
+          <% } %>
         </select>
+        <small><a href="/marly-dashboard/categories">إضافة أو حذف فئة</a></small>
+      </label>
+
+      <label>الفئة English
+        <input id="categoryEnInput" name="categoryEn" value="<%= product && product.categoryEn ? product.categoryEn : '' %>" placeholder="Example: Shirts">
       </label>
 
       <label>السعر
@@ -34,8 +48,12 @@
         <input type="number" name="oldPrice" value="<%= product && product.oldPrice ? product.oldPrice : '' %>">
       </label>
 
-      <label>نص العرض
+      <label>نص العرض عربي
         <input name="offerText" value="<%= product && product.offerText ? product.offerText : '' %>" placeholder="مثال: اشتري 2 وخد خصم 50%">
+      </label>
+
+      <label>Offer text English
+        <input name="offerTextEn" value="<%= product && product.offerTextEn ? product.offerTextEn : '' %>" placeholder="Example: Buy 2 and get 50% off">
       </label>
 
       <label>عدد القطع في العرض
@@ -67,21 +85,24 @@
           <input name="customSizes" placeholder="مثال: 10, 12, 5XL, Free Size">
         </label>
       </div>
-
+<!--
       <div class="full option-block">
-        <h3>الألوان المتاحة</h3>
-        <div class="checkbox-grid colors-checks">
-          <% ['أبيض','أسود','أخضر','كحلي','بيج','رمادي','وردي','أحمر','زيتوني','أزرق','بني'].forEach(color => { %>
-            <label><input type="checkbox" name="colors" value="<%= color %>" <%= product && (product.colors || []).includes(color) ? 'checked' : '' %>> <%= color %></label>
-          <% }) %>
-        </div>
-        <label class="manual-option">ألوان إضافية يدويًا
-          <input name="customColors" placeholder="مثال: سماوي, نبيتي, موف">
+        <h3>الألوان المتاحة بدون صور</h3>
+        <p>اكتب الألوان يدويًا عربي وإنجليزي. شلنا مربعات الاختيار الجاهزة لأنها كانت بتكرر الألوان مع صور الألوان.</p>
+        <label class="manual-option">الألوان عربي
+          <input name="customColors" value="<%= product && product.colors ? product.colors.join(', ') : '' %>" placeholder="مثال: سماوي, نبيتي, موف">
         </label>
-      </div>
+        <label class="manual-option">Colors English بنفس الترتيب
+          <input name="customColorsEn" value="<%= product && product.colorsEn ? product.colorsEn.join(', ') : '' %>" placeholder="Example: Sky Blue, Burgundy, Mauve">
+        </label>
+      </div>-->
 
-      <label class="full">الوصف
+      <label class="full">الوصف عربي
         <textarea name="description"><%= product ? product.description : '' %></textarea>
+      </label>
+
+      <label class="full">Description English
+        <textarea name="descriptionEn" placeholder="English product description"><%= product && product.descriptionEn ? product.descriptionEn : '' %></textarea>
       </label>
 
       <div class="full upload-pro">
@@ -95,18 +116,16 @@
 
       <div class="full color-image-upload option-block">
         <h3>صور الألوان</h3>
-        <p>اكتب اسم اللون وارفع صورته. العميل هيضغط على اللون في صفحة المنتج فتتغير الصورة.</p>
+        <p>اكتب اسم اللون عربي وإنجليزي وارفع صورته. العميل هيضغط على اللون في صفحة المنتج فتتغير الصورة، والاسم يتترجم حسب اللغة.</p>
         <div id="colorImageRows">
           <div class="color-image-row">
-            <input name="colorImageNames" placeholder="مثال: أخضر">
+            <input name="colorImageNames" placeholder="اللون عربي: أخضر">
+            <input name="colorImageNamesEn" placeholder="Color English: Green">
             <input type="file" name="colorImages" accept="image/*">
           </div>
           <div class="color-image-row">
-            <input name="colorImageNames" placeholder="مثال: أبيض">
-            <input type="file" name="colorImages" accept="image/*">
-          </div>
-          <div class="color-image-row">
-            <input name="colorImageNames" placeholder="مثال: كحلي">
+            <input name="colorImageNames" placeholder="اللون عربي: أبيض">
+            <input name="colorImageNamesEn" placeholder="Color English: White">
             <input type="file" name="colorImages" accept="image/*">
           </div>
         </div>
@@ -120,8 +139,8 @@
           <div class="admin-photo-grid">
             <% product.colorImages.forEach(item => { %>
               <label class="admin-photo-item">
-                <img src="<%= item.image %>" alt="<%= item.color %>" onerror="this.onerror=null;this.src='/public/images/logo.png'">
-                <b><%= item.color %></b>
+                <img src="<%= item.image %>" alt="" alt="<%= item.color %>" onerror="this.onerror=null;this.src='/public/images/logo.png'">
+                <b><%= item.color %> / <%= item.colorEn || item.color %></b>
                 <span><input type="checkbox" name="removeColorImages" value='<%- JSON.stringify({ color: item.color, image: item.image }) %>'> حذف اللون والصورة</span>
               </label>
             <% }) %>
@@ -136,7 +155,7 @@
           <div class="admin-photo-grid">
             <% product.images.forEach(img => { %>
               <label class="admin-photo-item">
-                <img src="<%= img %>" alt="صورة المنتج" onerror="this.onerror=null;this.src='/public/images/logo.png'">
+                <img src="<%= img %>" alt="" alt="صورة المنتج" onerror="this.onerror=null;this.src='/public/images/logo.png'">
                 <span><input type="checkbox" name="removeImages" value="<%= img %>"> حذف الصورة</span>
               </label>
             <% }) %>
@@ -152,19 +171,25 @@
         <label><input type="checkbox" name="active" <%= !product || product.active ? 'checked' : '' %>> ظاهر</label>
       </div>
 
-      <button class="btn big">حفظ المنتج</button>
+      <button type="submit" class="btn big">حفظ المنتج</button>
     </form>
   </main>
 </div>
 <script>
+function syncCategoryEn(select){
+  const input = document.getElementById('categoryEnInput');
+  const opt = select.options[select.selectedIndex];
+  if (input && opt && opt.dataset.en) input.value = opt.dataset.en;
+}
 function addColorImageRow(){
   const wrap = document.getElementById('colorImageRows');
   if(!wrap) return;
   const row = document.createElement('div');
   row.className = 'color-image-row';
-  row.innerHTML = '<input name="colorImageNames" placeholder="اسم اللون"><input type="file" name="colorImages" accept="image/*"><button type="button" class="danger" onclick="this.parentElement.remove()">حذف</button>';
+  row.innerHTML = '<input name="colorImageNames" placeholder="اللون عربي"><input name="colorImageNamesEn" placeholder="Color English"><input type="file" name="colorImages" accept="image/*"><button type="button" class="danger" onclick="this.parentElement.remove()">حذف</button>';
   wrap.appendChild(row);
 }
+document.addEventListener('DOMContentLoaded', function(){ const select = document.querySelector('select[name=\"category\"]'); if(select) syncCategoryEn(select); });
 </script>
 <script>
 (function(){

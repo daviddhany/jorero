@@ -1,22 +1,29 @@
-<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title><%= typeof title !== 'undefined' ? title : 'Jorero' %></title><meta name="description" content="Jorero Online Shop - ملابس رجالي وحريمي وأطفالي"><link rel="icon" href="/public/images/logo.png"><link rel="stylesheet" href="/public/css/style.css"></head><body>
-<div class="topbar">📍 <%= typeof info!='undefined'?info.address:'' %> &nbsp; ☎ 01016002162 &nbsp; | &nbsp; Online shop - اطلب من الموقع</div>
-<header class="header">
-  <a class="brand" href="/">
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title><%= typeof title !== 'undefined' ? title : 'Jorero' %></title><meta name="description" content="Jorero Online Shop - ملابس رجالي وحريمي وأطفالي"><link rel="icon" href="/public/images/logo.png"><link rel="stylesheet" href="/public/css/style.css?v=20250624"></head><body>
+<header class="header demos-header">
+  <div class="header-icons">
+    <a class="cart-link" href="/cart" title="السلة" data-count="<%= typeof cartCount !== 'undefined' ? cartCount : 0 %>">🛒</a>
+    <a class="fav-link" href="/favorites" title="المفضلة" id="headerFavLink">♡<span class="fav-badge" id="headerFavBadge"></span></a>
+    <button type="button" class="search-toggle" title="Search" id="searchToggleBtn">⌕</button>
+    <span class="lang-links header-lang-inline"><a href="#" data-lang-link="ar" onclick="setLang('ar');return false;">AR</a><span>/</span><a href="#" data-lang-link="en" onclick="setLang('en');return false;">EN</a></span>
+  </div>
+
+  <nav class="main-nav demos-nav">
+    <a href="/" data-i18n="home">الرئيسية</a>
+    <a href="/products" data-i18n="products">كل المنتجات</a>
+    <a href="/#new" data-i18n="newArrivals">وصل حديثًا</a>
+    <a href="/#contact" data-i18n="contact">تواصل معنا</a>
+    <a href="/cart" data-i18n="cart">السلة</a>
+  </nav>
+
+  <a class="brand demos-brand" href="/">
     <img id="secretAdminLogo" src="/public/images/logo.png" alt="Jorero">
-    <div><b>Jorero</b><span>Wear your mood</span></div>
+    <div><b>JORERO</b><span>Wear your mood</span></div>
   </a>
 
   <button class="mobile-menu-btn" type="button" aria-label="فتح القائمة" aria-expanded="false">☰</button>
 
-  <form class="search" action="/products">
-    <input name="q" placeholder="ابحث عن منتج...">
-    <button>بحث</button>
+  <form class="header-search-pop" action="/products">
+    <input name="q" data-placeholder-ar="ابحث عن منتج..." data-placeholder-en="Search for a product..." placeholder="ابحث عن منتج...">
+    <button type="submit" data-i18n="search">بحث</button>
   </form>
-
-  <nav class="main-nav">
-    <a href="/">الرئيسية</a>
-    <a href="/products">المنتجات</a>
-    <a href="/cart">السلة</a>
-    <a href="/#contact">التواصل</a>
-  </nav>
 </header>

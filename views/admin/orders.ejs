@@ -28,7 +28,7 @@
           <p><b>ملاحظات:</b> <%= order.notes || '-' %></p>
           <table><thead><tr><th>الصورة</th><th>المنتج</th><th>مقاس</th><th>لون</th><th>كمية</th><th>الإجمالي</th></tr></thead><tbody>
             <% order.items.forEach(item=>{ %>
-              <tr><td><img class="mini" src="<%= item.image %>" onerror="this.onerror=null;this.src='/public/images/logo.png'"></td><td><%= item.name %></td><td><%= item.size || '-' %></td><td><%= item.color || '-' %></td><td><%= item.quantity %></td><td><%= formatPrice(item.subtotal) %></td></tr>
+              <tr><td><img class="mini" src="<%= item.image %>" alt="" onerror="this.onerror=null;this.src='/public/images/logo.png'"></td><td><%= item.name %></td><td><%= item.size || '-' %></td><td><%= item.color || '-' %></td><td><%= item.quantity %></td><td><%= formatPrice(item.subtotal) %></td></tr>
             <% }) %>
           </tbody></table>
           <p>المنتجات: <%= formatPrice(order.itemsTotal) %> | التوصيل: <%= formatPrice(order.deliveryPrice) %></p>
@@ -40,7 +40,7 @@
               <% }) %>
             </select>
             <label class="mini-check"><input type="checkbox" name="notifyCustomer" checked> إرسال واتساب للعميل</label>
-            <button class="btn">تحديث الحالة</button>
+            <button type="submit" class="btn">تحديث الحالة</button>
           </form>
         </div>
       <% }) %>

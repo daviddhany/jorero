@@ -1,0 +1,115 @@
+<%- include('partials/header') %>
+
+<div class="favs-page">
+  <div class="favs-header">
+    <h1 id="favPageTitle">❤️ المفضلة</h1>
+    <p id="favPageSub">المنتجات اللي حفظتها هنا</p>
+  </div>
+  <div class="favs-grid" id="favsGrid"></div>
+  <div class="favs-empty" id="favsEmpty" style="display:none">
+    <div class="empty-icon">🤍</div>
+    <h2 id="favsEmptyTitle">مفيش منتجات في المفضلة لسه</h2>
+    <p id="favsEmptySub">ادوس على القلب على أي منتج عشان تحفظه هنا</p>
+    <a href="/products" id="favsBrowseBtn">تصفح المنتجات</a>
+  </div>
+</div>
+
+<script>
+(function(){
+  var I18N = {
+    ar: {
+      title: '❤️ المفضلة',
+      sub: 'المنتجات اللي حفظتها هنا',
+      emptyTitle: 'مفيش منتجات في المفضلة لسه',
+      emptySub: 'ادوس على القلب على أي منتج عشان تحفظه هنا',
+      browse: 'تصفح المنتجات',
+      buy: 'اشتري دلوقتي ←',
+      remove: 'إزالة'
+    },
+    en: {
+      title: '❤️ Favorites',
+      sub: 'Products you saved',
+      emptyTitle: 'No favorites yet',
+      emptySub: 'Tap the heart on any product to save it here',
+      browse: 'Browse Products',
+      buy: 'Buy Now →',
+      remove: 'Remove'
+    }
+  };
+
+  function getLang(){ return localStorage.getItem('joreroLang') || 'ar'; }
+
+  function getFavs(){
+    try{ return JSON.parse(localStorage.getItem('jorero_favs') || '[]'); }
+    catch(e){ return []; }
+  }
+
+  function removeFavItem(id){
+    var favs = getFavs().filter(function(f){ return f.id !== id; });
+    localStorage.setItem('jorero_favs', JSON.stringify(favs));
+    render();
+    // update badge in header if function available
+    if(typeof updateFavBadge === 'function') updateFavBadge();
+  }
+  window.removeFavItem = removeFavItem;
+
+  function render(){
+    var lang = getLang();
+    var tx = I18N[lang] || I18N.ar;
+    var favs = getFavs();
+
+    // Update static text
+    var el = function(id){ return document.getElementById(id); };
+    if(el('favPageTitle')) el('favPageTitle').textContent = tx.title;
+    if(el('favPageSub'))   el('favPageSub').textContent   = tx.sub;
+    if(el('favsEmptyTitle')) el('favsEmptyTitle').textContent = tx.emptyTitle;
+    if(el('favsEmptySub'))   el('favsEmptySub').textContent  = tx.emptySub;
+    if(el('favsBrowseBtn'))  el('favsBrowseBtn').textContent = tx.browse;
+
+    var grid  = el('favsGrid');
+    var empty = el('favsEmpty');
+    if(!grid) return;
+
+    if(!favs.length){
+      grid.innerHTML = '';
+      if(empty) empty.style.display = 'block';
+      return;
+    }
+    if(empty) empty.style.display = 'none';
+
+    grid.innerHTML = favs.map(function(f){
+      var name = (lang === 'en' && f.nameEn) ? f.nameEn : (f.name || '');
+      var price = Number(f.price || 0);
+      var oldPrice = Number(f.oldPrice || 0);
+      var priceStr = lang === 'en'
+        ? price.toLocaleString('en-US') + ' EGP'
+        : price.toLocaleString('ar-EG') + ' ج';
+      var oldPriceStr = oldPrice
+        ? (lang === 'en' ? oldPrice.toLocaleString('en-US') + ' EGP' : oldPrice.toLocaleString('ar-EG') + ' ج')
+        : '';
+      var safeId = f.id.replace(/'/g, "\\'");
+      return '<div class="fav-card">' +
+        '<a href="' + f.url + '"><img src="' + f.image + '" alt="" onerror="this.src=\'/public/images/logo.png\'"></a>' +
+        '<div class="fav-card-body">' +
+          '<h3>' + name + '</h3>' +
+          '<div><span class="fav-price">' + priceStr + '</span>' +
+          (oldPriceStr ? '<span class="fav-old">' + oldPriceStr + '</span>' : '') + '</div>' +
+          '<div class="fav-card-actions">' +
+            '<a href="' + f.url + '">' + tx.buy + '</a>' +
+            '<button type="submit" class="fav-remove-btn" onclick="removeFavItem(\'' + safeId + '\')" title="' + tx.remove + '">✕</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  // Run immediately + after load to be safe
+  render();
+  window.addEventListener('load', render);
+
+  // Listen for lang changes from main.js
+  window.addEventListener('jorero-lang-change', render);
+})();
+</script>
+
+<%- include('partials/footer') %>

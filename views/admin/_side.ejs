@@ -7,11 +7,12 @@
   <a href="/marly-dashboard/reports">تقارير ومبيعات</a>
   <% if (!admin || ['super_admin','admin','manager'].includes(admin.role)) { %>
     <a href="/marly-dashboard/products/new">إضافة منتج</a>
+    <a href="/marly-dashboard/categories">إدارة الفئات</a>
     <a href="/marly-dashboard/settings">تخصيص الواجهة</a>
   <% } %>
   <% if (admin && ['super_admin','admin'].includes(admin.role)) { %>
     <a href="/marly-dashboard/admins">المستخدمين والصلاحيات</a>
   <% } %>
   <a href="/" target="_blank">عرض الموقع</a>
-  <form method="post" action="/marly-dashboard/logout"><button>تسجيل خروج</button></form>
+  <form method="post" action="/marly-dashboard/logout"><button type="submit">تسجيل خروج</button></form>
 </aside>

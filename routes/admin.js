@@ -12,6 +12,8 @@ const { sendWhatsAppText, statusMessage } = require('../services/whatsapp');
 
 const uploadDir = path.join(__dirname, '../public/uploads');
 const FALLBACK_SIZES = ['2','4','6','8','S','M','L','XL','XXL','3XL','4XL'];
+const FALLBACK_CATEGORIES = ['رجالي','حريمي','أطفالي','تيشيرتات','قمصان','بناطيل','جينز','أطقم','جاكيت','سويت شيرت'];
+const FALLBACK_CATEGORIES_EN = ['Men','Women','Kids','T-Shirts','Shirts','Pants','Jeans','Sets','Jackets','Sweatshirts'];
 const ROLES = ['super_admin', 'admin', 'manager', 'employee'];
 const ROLE_LABELS = { super_admin: 'Super Admin', admin: 'Admin', manager: 'Manager', employee: 'Employee' };
 const STATUS_LABELS = { pending: 'لسه موجودة', processing: 'جاري التجهيز', shipped: 'خرج للتوصيل', done: 'خلصت', cancelled: 'ملغي' };
@@ -68,6 +70,12 @@ function mergeManual(selected, manual) {
   return [...new Set(values.map(v => String(v).trim()).filter(Boolean))];
 }
 
+function alignTranslatedList(arValue, enValue) {
+  const ar = normalizeArray(arValue);
+  const en = normalizeArray(enValue);
+  return ar.map((value, index) => String(en[index] || value).trim()).filter(Boolean);
+}
+
 function uniqueValues(values) {
   return [...new Set(normalizeArray(values).map(v => String(v).trim()).filter(Boolean))];
 }
@@ -100,21 +108,28 @@ async function getSiteSettings() {
     { new: true, upsert: true, setDefaultsOnInsert: true }
   ).lean();
   if (!settings.defaultSizes || !settings.defaultSizes.length) settings.defaultSizes = FALLBACK_SIZES;
+  if (!settings.categoryOptions || !settings.categoryOptions.length) settings.categoryOptions = FALLBACK_CATEGORIES;
+  if (!settings.categoryOptionsEn || !settings.categoryOptionsEn.length) settings.categoryOptionsEn = FALLBACK_CATEGORIES_EN;
   return settings;
 }
 
 function productPayload(body) {
   return {
     name: body.name,
+    nameEn: body.nameEn || body.name,
     category: body.category,
+    categoryEn: body.categoryEn || body.category,
     price: Number(body.price || 0),
     oldPrice: body.oldPrice ? Number(body.oldPrice) : undefined,
     description: body.description,
+    descriptionEn: body.descriptionEn || body.description,
     offerText: body.offerText || '',
+    offerTextEn: body.offerTextEn || '',
     offerBuyQty: Number(body.offerBuyQty || 0),
     offerDiscountPercent: Number(body.offerDiscountPercent || 0),
     sizes: mergeManual(body.sizes, body.customSizes),
-    colors: mergeManual(body.colors, body.customColors),
+    colors: uniqueValues(body.customColors),
+    colorsEn: alignTranslatedList(body.customColors, body.customColorsEn),
     stock: Number(body.stock || 1),
     featured: !!body.featured,
     bestSeller: !!body.bestSeller,
@@ -126,11 +141,13 @@ function productPayload(body) {
 
 async function buildColorImages(body, files) {
   const colorNames = toArray(body.colorImageNames);
+  const colorNamesEn = toArray(body.colorImageNamesEn);
   const uploaded = await saveFiles(((files && files.colorImages) || []), 'color');
   const result = [];
   uploaded.forEach((image, index) => {
     const color = String(colorNames[index] || '').trim();
-    if (color && image) result.push({ color, image });
+    const colorEn = String(colorNamesEn[index] || color).trim();
+    if (color && image) result.push({ color, colorEn, image });
   });
   return result;
 }
@@ -257,6 +274,42 @@ router.post('/orders/:id/status', auth, async (req, res) => {
   res.redirect('/marly-dashboard/orders' + (req.body.backStatus ? `?status=${encodeURIComponent(req.body.backStatus)}` : ''));
 });
 
+
+router.get('/categories', auth, requireRole('manager', 'admin'), async (req, res) => {
+  const settings = await getSiteSettings();
+  const productsByCategory = await Product.aggregate([{ $group: { _id: '$category', count: { $sum: 1 } } }]);
+  const counts = {};
+  productsByCategory.forEach(item => { counts[item._id || ''] = item.count; });
+  res.render('admin/categories', { title: 'إدارة الفئات', settings, counts, error: null });
+});
+
+router.post('/categories', auth, requireRole('manager', 'admin'), async (req, res) => {
+  const newCategory = String(req.body.category || '').trim();
+  const newCategoryEn = String(req.body.categoryEn || req.body.category || '').trim();
+  const settings = await getSiteSettings();
+  const categories = [...(settings.categoryOptions || FALLBACK_CATEGORIES)];
+  const categoriesEn = [...(settings.categoryOptionsEn || FALLBACK_CATEGORIES_EN)];
+  if (newCategory && !categories.includes(newCategory)) {
+    categories.push(newCategory);
+    categoriesEn.push(newCategoryEn || newCategory);
+  }
+  await Setting.findOneAndUpdate({ key: 'site' }, { categoryOptions: categories, categoryOptionsEn: categoriesEn }, { upsert: true, new: true, setDefaultsOnInsert: true });
+  res.redirect('/marly-dashboard/categories');
+});
+
+router.delete('/categories', auth, requireRole('manager', 'admin'), async (req, res) => {
+  const category = String(req.body.category || '').trim();
+  const settings = await getSiteSettings();
+  const currentCats = settings.categoryOptions || FALLBACK_CATEGORIES;
+  const currentCatsEn = settings.categoryOptionsEn || FALLBACK_CATEGORIES_EN;
+  const removeIndex = currentCats.indexOf(category);
+  const categories = currentCats.filter(c => c !== category);
+  const categoriesEn = currentCatsEn.filter((_, i) => i !== removeIndex);
+  await Setting.findOneAndUpdate({ key: 'site' }, { categoryOptions: categories.length ? categories : FALLBACK_CATEGORIES, categoryOptionsEn: categoriesEn.length ? categoriesEn : FALLBACK_CATEGORIES_EN }, { upsert: true, new: true, setDefaultsOnInsert: true });
+  await Product.updateMany({ category }, { category: 'منتجات أخرى', categoryEn: 'Other Products' });
+  res.redirect('/marly-dashboard/categories');
+});
+
 router.get('/settings', auth, requireRole('manager', 'admin'), async (req, res) => {
   const settings = await getSiteSettings();
   res.render('admin/settings', { settings, title: 'تخصيص الواجهة' });
@@ -280,17 +333,25 @@ router.post('/settings', auth, requireRole('manager', 'admin'), upload.array('he
 
   const newHeroImages = await saveFiles(req.files || [], 'hero');
   heroImages = [...heroImages, ...newHeroImages];
-  if (!heroImages.length) heroImages = ['/public/uploads/polo-set-900.jpg'];
+  if (!heroImages.length) heroImages = ['/public/images/logo.png'];
 
   const payload = {
     heroEyebrow: body.heroEyebrow || '',
+    heroEyebrowEn: body.heroEyebrowEn || body.heroEyebrow || '',
     heroTitle: body.heroTitle || '',
+    heroTitleEn: body.heroTitleEn || body.heroTitle || '',
     heroSubtitle: body.heroSubtitle || '',
+    heroSubtitleEn: body.heroSubtitleEn || body.heroSubtitle || '',
     heroPrimaryText: body.heroPrimaryText || 'تسوق الآن',
+    heroPrimaryTextEn: body.heroPrimaryTextEn || 'Shop Now',
     deliveryPrice: Number(body.deliveryPrice || 0),
     homeNoteTitle: body.homeNoteTitle || '',
+    homeNoteTitleEn: body.homeNoteTitleEn || body.homeNoteTitle || '',
     homeNoteText: body.homeNoteText || '',
+    homeNoteTextEn: body.homeNoteTextEn || body.homeNoteText || '',
     defaultSizes: uniqueValues(body.defaultSizes).length ? uniqueValues(body.defaultSizes) : FALLBACK_SIZES,
+    categoryOptions: uniqueValues(body.categoryOptions).length ? uniqueValues(body.categoryOptions) : FALLBACK_CATEGORIES,
+    categoryOptionsEn: uniqueValues(body.categoryOptionsEn).length ? uniqueValues(body.categoryOptionsEn) : FALLBACK_CATEGORIES_EN,
     heroImages,
     heroImage: heroImages[0]
   };

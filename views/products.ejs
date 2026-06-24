@@ -1,6 +1,16 @@
 <%- include('partials/header') %>
-<div class="page-head"><div><span class="eyebrow">Jorero Online Shop</span><h1>كل المنتجات</h1><p>اختار المنتج وضيفه للسلة وكمل الطلب.</p></div><button class="filterBtn" onclick="toggleFilter()">☰ الفلاتر</button></div>
-<aside class="filter" id="filter"><button onclick="toggleFilter()">×</button><h3>فلترة المنتجات</h3><form><input name="q" value="<%= q %>" placeholder="بحث باسم المنتج"><select name="category"><option value="">كل الفئات</option><% ['رجالي','حريمي','أطفالي','تيشيرتات','قمصان','بناطيل','جينز','أطقم'].forEach(c=>{ %><option <%= cat==c?'selected':'' %>><%= c %></option><% }) %></select><input name="min" value="<%= min||'' %>" placeholder="أقل سعر"><input name="max" value="<%= max==999999?'':max %>" placeholder="أعلى سعر"><button class="btn">تطبيق الفلتر</button><a class="btn light" href="/products">إلغاء الفلتر</a></form></aside>
-<div class="grid products-grid"><% products.forEach(p=>{ %><%- include('partials/card',{p}) %><% }) %></div>
-<% if(!products.length){ %><div class="empty">لا توجد منتجات مطابقة للبحث حاليًا.</div><% } %>
+<div class="demos-intro page-intro"><h1 data-i18n="allProductsTitle">كل منتجات Jorero</h1><p data-i18n="allProductsText">اختار المنتج المناسب ليك وضيفه للسلة وكمل الطلب بسهولة.</p></div>
+<aside class="filter" id="filter"><button type="submit" onclick="toggleFilter()">×</button><h3 data-i18n="filterProducts">فلترة المنتجات</h3><form><input name="q" value="<%= q %>" data-placeholder-ar="بحث باسم المنتج" data-placeholder-en="Search by product name" placeholder="بحث باسم المنتج"><select name="category"><option value="" data-i18n="allCategories">كل الفئات</option><% const categoryOptions = settings && settings.categoryOptions && settings.categoryOptions.length ? settings.categoryOptions : ['رجالي','حريمي','أطفالي','تيشيرتات','قمصان','بناطيل','جينز','أطقم','جاكيت','سويت شيرت']; const categoryOptionsEn = settings && settings.categoryOptionsEn && settings.categoryOptionsEn.length ? settings.categoryOptionsEn : categoryOptions; categoryOptions.forEach((c,i)=>{ const en = categoryOptionsEn[i] || c; %><option value="<%= c %>" <%= cat==c?'selected':'' %> data-ar="<%= c %>" data-en="<%= en %>"><%= c %></option><% }) %></select><input name="min" value="<%= min||'' %>" data-placeholder-ar="أقل سعر" data-placeholder-en="Min price" placeholder="أقل سعر"><input name="max" value="<%= max==999999?'':max %>" data-placeholder-ar="أعلى سعر" data-placeholder-en="Max price" placeholder="أعلى سعر"><button type="submit" class="btn" data-i18n="applyFilter">تطبيق الفلتر</button><a class="btn light" href="/products" data-i18n="clearFilter">إلغاء الفلتر</a></form></aside>
+<div class="products-toolbar"><button type="submit" class="filterBtn" onclick="toggleFilter()" data-i18n="filtersBtn">☰ الفلاتر</button></div>
+<% const groupedProducts = {}; products.forEach(p => { const c = p.category || 'منتجات أخرى'; if (!groupedProducts[c]) groupedProducts[c] = []; groupedProducts[c].push(p); }); %>
+<% Object.keys(groupedProducts).forEach(categoryName => { const list = groupedProducts[categoryName]; const first = list[0] || {}; const categoryEn = first.categoryEn || (settings.categoryOptionsEn && settings.categoryOptions ? settings.categoryOptionsEn[(settings.categoryOptions || []).indexOf(categoryName)] : '') || categoryName; %>
+  <section class="demos-section-title category-page-title"><h2 data-ar="<%= categoryName %>" data-en="<%= categoryEn %>"><%= categoryName %></h2></section>
+  <section class="demos-product-shell products-page-shell" data-product-slider>
+    <button class="product-arrow product-prev" type="button" data-product-prev>‹</button>
+    <div class="product-scroll demos-grid"><% list.forEach(p=>{ %><%- include('partials/card',{p}) %><% }) %></div>
+    <button class="product-arrow product-next" type="button" data-product-next>›</button>
+    <div class="slider-dots"><% list.forEach((p,i)=>{ %><span class="<%= i===0?'active':'' %>"></span><% }) %></div>
+  </section>
+<% }) %>
+<% if(!products.length){ %><div class="empty" data-i18n="noProducts">لا توجد منتجات مطابقة للبحث حاليًا.</div><% } %>
 <%- include('partials/footer') %>

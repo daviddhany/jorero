@@ -13,30 +13,57 @@
   <main class="admin-main">
     <h1>إعدادات Jorero</h1>
     <form class="product-form" method="post" enctype="multipart/form-data" action="/marly-dashboard/settings">
-      <label>النص الصغير أعلى الهيرو
+      <label>النص الصغير أعلى الهيرو عربي
         <input name="heroEyebrow" value="<%= settings.heroEyebrow || '' %>">
       </label>
-      <label>عنوان الهيرو الرئيسي
+      <label>Hero eyebrow English
+        <input name="heroEyebrowEn" value="<%= settings.heroEyebrowEn || settings.heroEyebrow || '' %>">
+      </label>
+      <label>عنوان الهيرو الرئيسي عربي
         <input name="heroTitle" value="<%= settings.heroTitle || '' %>">
       </label>
-      <label class="full">وصف الهيرو
+      <label>Hero title English
+        <input name="heroTitleEn" value="<%= settings.heroTitleEn || settings.heroTitle || '' %>">
+      </label>
+      <label class="full">وصف الهيرو عربي
         <textarea name="heroSubtitle"><%= settings.heroSubtitle || '' %></textarea>
       </label>
-      <label>نص زر التسوق
+      <label class="full">Hero description English
+        <textarea name="heroSubtitleEn"><%= settings.heroSubtitleEn || settings.heroSubtitle || '' %></textarea>
+      </label>
+      <label>نص زر التسوق عربي
         <input name="heroPrimaryText" value="<%= settings.heroPrimaryText || 'تسوق الآن' %>">
+      </label>
+      <label>Shop button English
+        <input name="heroPrimaryTextEn" value="<%= settings.heroPrimaryTextEn || 'Shop Now' %>">
       </label>
       <label>سعر التوصيل
         <input type="number" name="deliveryPrice" value="<%= settings.deliveryPrice || 0 %>">
       </label>
-      <label>عنوان ملاحظة المعرض
+      <label>عنوان ملاحظة المعرض عربي
         <input name="homeNoteTitle" value="<%= settings.homeNoteTitle || '' %>">
       </label>
-      <label class="full">نص ملاحظة المعرض
+      <label>Home note title English
+        <input name="homeNoteTitleEn" value="<%= settings.homeNoteTitleEn || settings.homeNoteTitle || '' %>">
+      </label>
+      <label class="full">نص ملاحظة المعرض عربي
         <input name="homeNoteText" value="<%= settings.homeNoteText || '' %>">
+      </label>
+      <label class="full">Home note text English
+        <input name="homeNoteTextEn" value="<%= settings.homeNoteTextEn || settings.homeNoteText || '' %>">
       </label>
 
       <label class="full">المقاسات العامة في صفحة إضافة المنتج
         <textarea name="defaultSizes" placeholder="اكتب كل المقاسات وبينهم فاصلة. مثال: 2, 4, 6, 8, S, M, L"><%= (settings.defaultSizes && settings.defaultSizes.length ? settings.defaultSizes : ['2','4','6','8','S','M','L','XL','XXL','3XL','4XL']).join(', ') %></textarea>
+      </label>
+
+      <label class="full">الفئات العامة عربي
+        <textarea name="categoryOptions" placeholder="اكتب كل الفئات وبينهم فاصلة. مثال: قمصان, بناطيل, جاكيت"><%= (settings.categoryOptions && settings.categoryOptions.length ? settings.categoryOptions : ['رجالي','حريمي','أطفالي','تيشيرتات','قمصان','بناطيل','جينز','أطقم','جاكيت','سويت شيرت']).join(', ') %></textarea>
+      </label>
+
+      <label class="full">General Categories English
+        <textarea name="categoryOptionsEn" placeholder="Separate categories with comma. Example: Shirts, Pants, Jackets"><%= (settings.categoryOptionsEn && settings.categoryOptionsEn.length ? settings.categoryOptionsEn : ['Men','Women','Kids','T-Shirts','Shirts','Pants','Jeans','Sets','Jackets','Sweatshirts']).join(', ') %></textarea>
+        <small>خلي ترتيب الإنجليزي نفس ترتيب العربي. أو استخدم صفحة <a href="/marly-dashboard/categories">إدارة الفئات</a>.</small>
       </label>
 
       <label class="full">صور الهيرو Carousel - يمكنك رفع أكثر من صورة
@@ -51,7 +78,7 @@
           <div class="admin-photo-grid">
             <% heroImages.forEach(img => { %>
               <label class="admin-photo-item">
-                <img src="<%= img %>" alt="صورة الهيرو" onerror="this.onerror=null;this.src='/public/images/logo.png'">
+                <img src="<%= img %>" alt="" alt="صورة الهيرو" onerror="this.onerror=null;this.src='/public/images/logo.png'">
                 <span><input type="checkbox" name="removeHeroImages" value="<%= img %>"> حذف الصورة</span>
               </label>
             <% }) %>
@@ -59,7 +86,7 @@
         </div>
       <% } %>
 
-      <button class="btn big">حفظ الإعدادات</button>
+      <button type="submit" class="btn big">حفظ الإعدادات</button>
     </form>
   </main>
 </div>

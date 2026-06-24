@@ -1,2 +1,19 @@
-<a class="whatsapp" target="_blank" href="https://wa.me/201212227833">واتساب</a>
-<footer id="contact" class="footer"><div><img src="/public/images/logo.png"><h3>Jorero</h3><p>Wear your mood</p></div><p>متخصصين في تصنيع وبيع الملابس الرجالي والحريمي والأطفالي. المصنع والمحل في مكان واحد.</p><p>العنوان: ٩ شارع محمد رشاد شفيق السيوف شماعه، خلف قرية عبد الوهاب للمشويات</p><p>واتساب: 01212227833 | تليفون: 01016002162</p></footer><script src="/public/js/main.js"></script></body></html>
+<a class="whatsapp" target="_blank" href="https://wa.me/201212227833">☘</a>
+<footer id="contact" class="footer demos-footer"><p data-i18n="footerText">صُمم بواسطة Jorero لتجربة تسوق إلكتروني حديثة ومميزة. للمزيد من المعلومات.</p><p><span data-i18n="address">العنوان</span>: <span data-ar="٩ شارع محمد رشاد شفيق السيوف شماعه، خلف قرية عبد الوهاب للمشويات" data-en="9 Mohamed Rashad Shafik St., El Seyouf Shamaa, behind Abdel Wahab Village Restaurant">٩ شارع محمد رشاد شفيق السيوف شماعه، خلف قرية عبد الوهاب للمشويات</span></p><p><span data-i18n="whatsapp">واتساب</span>: 01212227833 | <span data-i18n="phone">تليفون</span>: 01016002162</p></footer><script src="/public/js/main.js?v=20250624"></script><script>
+(function(){
+  var docW = document.documentElement.offsetWidth;
+  var worst = null, worstW = 0;
+  document.querySelectorAll('*').forEach(function(el){
+    var r = el.getBoundingClientRect();
+    if(r.right > docW + 2 || r.left < -2){
+      if(el.offsetWidth > worstW){
+        worstW = el.offsetWidth;
+        worst = el;
+      }
+      el.style.outline = '3px solid red';
+    }
+  });
+  if(worst) console.warn('WORST OVERFLOW:', worst.tagName, worst.className, worst.id, 'w='+worstW);
+})();
+</script>
+</body></html>

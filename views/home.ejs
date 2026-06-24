@@ -1,43 +1,79 @@
 <%- include('partials/header') %>
+<% const heroImages = (settings.heroImages && settings.heroImages.length ? settings.heroImages : [settings.heroImage || (products[0] && products[0].images && products[0].images[0]) || '/public/images/logo.png']).filter(Boolean); %>
+<% const catTr = {'رجالي':'Men','حريمي':'Women','نسائي':'Women','أطفالي':'Kids','اطفالي':'Kids','تيشيرتات':'T-shirts','قمصان':'Shirts','بناطيل':'Pants','جينز':'Jeans','أطقم':'Sets','اطقم':'Sets','جاكيت':'Jackets','سويت شيرت':'Sweatshirts','منتجات أخرى':'Other Products'}; const toCatEn = (v) => catTr[v] || v || 'Category'; %>
 
-<section class="hero showroom-hero showroom-full">
-  <div class="hero-content">
-    <span class="eyebrow"><%= settings.heroEyebrow %></span>
-    <h1><%= settings.heroTitle %></h1>
-    <p><%= settings.heroSubtitle %></p>
-    <div class="hero-actions">
-      <a class="btn big" href="/products"><%= settings.heroPrimaryText || 'تسوق الآن' %></a>
-      <a class="btn light" href="/cart">افتح السلة</a>
-    </div>
+<section class="demos-hero" data-carousel dir="ltr">
+  <% heroImages.forEach((img, index) => { %>
+    <img class="hero-slide <%= index === 0 ? 'active' : '' %>" alt="" src="<%= img %>" alt="Jorero hero" onerror="this.onerror=null;this.src='/public/images/logo.png'">
+  <% }) %>
+  <div class="hero-overlay">
+    <h1 data-ar="<%= settings.heroTitle || 'JORERO SUMMER' %>" data-en="<%= settings.heroTitleEn || 'JORERO SUMMER' %>"><%= settings.heroTitle || 'JORERO SUMMER' %></h1>
+    <p data-ar="<%= settings.heroSubtitle || 'أقوى تشكيلة ملابس عصرية في مكان واحد' %>" data-en="<%= settings.heroSubtitleEn || 'Discover trendy fashion for men, women and kids in one place.' %>"><%= settings.heroSubtitle || 'أقوى تشكيلة ملابس عصرية في مكان واحد' %></p>
+    <a class="btn big" href="/products" data-i18n="shopNow">تسوق الآن</a>
   </div>
-  <% const heroImages = (settings.heroImages && settings.heroImages.length ? settings.heroImages : [settings.heroImage || '/public/uploads/polo-set-900.jpg']).filter(Boolean); %>
-  <div class="hero-media hero-carousel" data-carousel>
-    <% heroImages.forEach((img, index) => { %>
-      <img class="hero-slide <%= index === 0 ? 'active' : '' %>" src="<%= img %>" alt="Jorero <%= index + 1 %>" onerror="this.onerror=null;this.src='/public/images/logo.png'">
+  <% if (heroImages.length > 1) { %>
+    <button class="hero-arrow hero-next" type="button" data-carousel-next>‹</button>
+    <button class="hero-arrow hero-prev" type="button" data-carousel-prev>›</button>
+    <div class="hero-dots"><% heroImages.forEach((img, index) => { %><span class="<%= index === 0 ? 'active' : '' %>" data-carousel-dot="<%= index %>"></span><% }) %></div>
+  <% } %>
+</section>
+
+<section class="demos-intro">
+  <h1 data-i18n="homeTitle">أقوى و أجدد تشكيلة ملابس<br>من Jorero</h1>
+  <p data-i18n="homeText">Jorero جايبلك أحدث الإطلالات في القمصان، السويت شيرت، الجواكيت والبناطيل في مكان واحد.</p>
+</section>
+
+<section class="demos-product-shell" data-product-slider>
+  <button class="product-arrow product-prev" type="button" data-product-prev>‹</button>
+  <div class="product-scroll demos-grid"><% products.slice(0,6).forEach(p=>{ %><%- include('partials/card',{p}) %><% }) %></div>
+  <button class="product-arrow product-next" type="button" data-product-next>›</button>
+  <div class="slider-dots"><% products.slice(0,6).forEach((p,i)=>{ %><span class="<%= i===0?'active':'' %>"></span><% }) %></div>
+</section>
+
+<section class="demos-categories">
+  <h2 data-i18n="categoriesTitle">اكتشف تشكيلتنا على<br>حسب اللي يناسبك</h2>
+  <p data-i18n="categoriesText">سواء بتدور على جاكيت، سويت شيرت، قميص، أو بنطلون عملي... جمعنالك كل الفئات في مكان واحد عشان توصل للي يعجبك بسهولة.</p>
+  <% const productCategoriesForTiles = [...new Set(products.map(p => p.category).filter(Boolean))]; const visibleCategories = (settings.categoryOptions && settings.categoryOptions.length ? settings.categoryOptions : productCategoriesForTiles).slice(0,4); const visibleCategoriesEn = (settings.categoryOptionsEn && settings.categoryOptionsEn.length ? settings.categoryOptionsEn : visibleCategories.map(toCatEn)).slice(0,4); %>
+  <div class="category-mosaic">
+    <% visibleCategories.forEach((catName, index) => { const catEn = visibleCategoriesEn[index] || toCatEn(catName); const catProduct = products.find(p => p.category === catName) || products[index] || products[0]; const catImg = (catProduct && catProduct.images && catProduct.images[0]) || '/public/images/logo.png'; %>
+      <% if (index === 1) { %><div class="cat-stack"><% } %>
+      <a class="cat-tile <%= (index === 0 || index === 3) ? 'tall' : '' %>" href="/products?category=<%= encodeURIComponent(catName) %>">
+        <h3 data-ar="<%= catName %>" data-en="<%= catEn %>"><%= catName %></h3><span data-ar="تشكيلة مختارة من <%= catName %>" data-en="Selected collection from <%= catEn %>">تشكيلة مختارة من <%= catName %></span><b data-i18n="shopMore">تسوق المزيد</b><img src="<%= catImg %>" alt="" onerror="this.onerror=null;this.src='/public/images/logo.png'">
+      </a>
+      <% if (index === 2) { %></div><% } %>
     <% }) %>
-    <% if (heroImages.length > 1) { %><div class="hero-dots"><% heroImages.forEach((img, index) => { %><span class="<%= index === 0 ? 'active' : '' %>"></span><% }) %></div><% } %>
-    <div class="floating-card"><%= settings.homeNoteTitle || 'Online Shop' %><br><b>اطلب دلوقتي</b></div>
   </div>
 </section>
 
-<section class="showroom-note-wide"><b><%= settings.homeNoteTitle %></b><span><%= settings.homeNoteText %></span></section>
+<section id="new" class="demos-section-title"><h2 data-i18n="newArrivals">وصل حديثًا</h2><p data-i18n="newText">تشكيلة جديدة وصلت دلوقتي، موديلات عصرية وخامات مريحة تناسب ذوقك.</p></section>
+<% const newProducts = products.filter(p=>p.newArrival); %>
+<% if (newProducts.length) { %>
+<section class="demos-product-shell" data-product-slider>
+  <button class="product-arrow product-prev" type="button" data-product-prev>‹</button>
+  <div class="product-scroll demos-grid"><% newProducts.forEach(p=>{ %><%- include('partials/card',{p}) %><% }) %></div>
+  <button class="product-arrow product-next" type="button" data-product-next>›</button>
+  <div class="slider-dots"><% newProducts.forEach((p,i)=>{ %><span class="<%= i===0?'active':'' %>"></span><% }) %></div>
+</section>
+<% } %>
 
+<% const groupedProducts = {}; products.forEach(p => { const c = p.category || 'منتجات أخرى'; if (!groupedProducts[c]) groupedProducts[c] = []; groupedProducts[c].push(p); }); %>
+<% Object.keys(groupedProducts).forEach(categoryName => { const list = groupedProducts[categoryName]; const first = list[0] || {}; const categoryEn = first.categoryEn || toCatEn(categoryName); %>
+  <section class="demos-section-title"><h2 data-ar="<%= categoryName %>" data-en="<%= categoryEn %>"><%= categoryName %></h2></section>
+  <section class="demos-product-shell" data-product-slider>
+    <button class="product-arrow product-prev" type="button" data-product-prev>‹</button>
+    <div class="product-scroll demos-grid"><% list.forEach(p=>{ %><%- include('partials/card',{p}) %><% }) %></div>
+    <button class="product-arrow product-next" type="button" data-product-next>›</button>
+    <div class="slider-dots"><% list.forEach((p,i)=>{ %><span class="<%= i===0?'active':'' %>"></span><% }) %></div>
+  </section>
+<% }) %>
 
-
-<section>
-  <h2>تصفح حسب الفئة</h2>
-  <div class="cats visual-cats">
-    <a href="/products?category=رجالي">رجالي</a>
-    <a href="/products?category=حريمي">حريمي</a>
-    <a href="/products?category=أطفالي">أطفالي</a>
-    <a href="/products?category=تيشيرتات">تيشيرتات</a>
-    <a href="/products?category=قمصان">قمصان</a>
-    <a href="/products?category=بناطيل">بناطيل</a>
+<section class="testimonials">
+  <h2 data-i18n="reviewsTitle">آراء عملائنا في Jorero</h2>
+  <div class="test-grid">
+    <div><strong>★★★★★</strong><p data-i18n="review1">"الخامة ناعمة والمقاس مضبوط."</p><b data-i18n="reviewName1">أحمد - المنتج: قميص</b></div>
+    <div><strong>★★★★★</strong><p data-i18n="review2">"الطلب وصل بسرعة والتغليف محترم."</p><b data-i18n="reviewName2">شريف - المنتج: سويت شيرت</b></div>
+    <div><strong>★★★★★</strong><p data-i18n="review3">"الشكل أحسن من الصور والمقاس مظبوط."</p><b data-i18n="reviewName3">كريم - المنتج: جاكيت</b></div>
   </div>
 </section>
 
-<section><div class="section-title"><h2>منتجات مميزة</h2><a href="/products">عرض الكل</a></div><div class="grid"><% products.filter(p=>p.featured).slice(0,4).forEach(p=>{ %><%- include('partials/card',{p}) %><% }) %></div></section>
-<section><div class="section-title"><h2>وصل حديثًا</h2><a href="/products">كل المنتجات</a></div><div class="grid"><% products.filter(p=>p.newArrival).slice(0,4).forEach(p=>{ %><%- include('partials/card',{p}) %><% }) %></div></section>
-
-<section class="visit-box" id="contact"><h2>بيانات التواصل</h2><p><%= info.address %></p><div class="visit-grid"><div>📱 <b>01016002162</b></div><div>واتساب <b>01212227833</b></div><div><a class="btn" target="_blank" href="https://wa.me/<%= info.whatsapp %>">تواصل واتساب</a></div></div></section>
 <%- include('partials/footer') %>
